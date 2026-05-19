@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Running Pace Calculator</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f7f6;
+      color: #1f2933;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 24px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+      text-align: center;
+      color: #0f766e;
+      margin-top: 0;
+    }
+
+    p {
+      text-align: center;
+      color: #5b6570;
+      margin-bottom: 30px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .full {
+      grid-column: span 2;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid #d6d6d6;
+      font-size: 1rem;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 24px;
+      border: none;
+      border-radius: 14px;
+      background: #0f766e;
+      color: white;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0b5d56;
+    }
+
+    .results {
+      margin-top: 30px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .card {
+      background: #f8faf9;
+      border-radius: 18px;
+      padding: 20px;
+      text-align: center;
+      border: 1px solid #e4e7ea;
+    }
+
+    .card h3 {
+      margin-top: 0;
+      color: #5b6570;
+      font-size: 1rem;
+    }
+
+    .value {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #0f766e;
+    }
+
+    @media (max-width: 600px) {
+      .grid,
+      .results {
+        grid-template-columns: 1fr;
+      }
+
+      .full {
+        grid-column: span 1;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>🏃 Running Pace Calculator</h1>
+
+    <p>
+      Calculate running pace and speed from distance and time.
+    </p>
+
+    <div class="grid">
+
+      <div class="full">
+        <label>Distance</label>
+        <input type="number" id="distance" placeholder="Enter distance">
+      </div>
+
+      <div class="full">
+        <label>Unit</label>
+        <select id="unit">
+          <option value="km">Kilometres</option>
+          <option value="miles">Miles</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Hours</label>
+        <input type="number" id="hours" value="0">
+      </div>
+
+      <div>
+        <label>Minutes</label>
+        <input type="number" id="minutes" value="0">
+      </div>
+
+      <div class="full">
+        <label>Seconds</label>
+        <input type="number" id="seconds" value="0">
+      </div>
+
+    </div>
+
+    <button onclick="calculatePace()">
+      Calculate
+    </button>
+
+    <div class="results">
+
+      <div class="card">
+        <h3>Pace per km</h3>
+        <div class="value" id="paceKm">--</div>
+      </div>
+
+      <div class="card">
+        <h3>Pace per mile</h3>
+        <div class="value" id="paceMile">--</div>
+      </div>
+
+      <div class="card">
+        <h3>Speed km/h</h3>
+        <div class="value" id="speedKm">--</div>
+      </div>
+
+      <div class="card">
+        <h3>Speed mph</h3>
+        <div class="value" id="speedMph">--</div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+
+    function formatPace(minutesDecimal) {
+
+      const mins = Math.floor(minutesDecimal);
+      const secs = Math.round((minutesDecimal - mins) * 60);
+
+      return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function calculatePace() {
+
+      const distance = parseFloat(document.getElementById('distance').value);
+      const unit = document.getElementById('unit').value;
+
+      const hours = parseFloat(document.getElementById('hours').value) || 0;
+      const minutes = parseFloat(document.getElementById('minutes').value) || 0;
+      const seconds = parseFloat(document.getElementById('seconds').value) || 0;
+
+      const totalHours = hours + (minutes / 60) + (seconds / 3600);
+
+      if (!distance || totalHours <= 0) {
+        alert('Please enter valid distance and time.');
+        return;
+      }
+
+      let distanceKm;
+      let distanceMiles;
+
+      if (unit === 'km') {
+        distanceKm = distance;
+        distanceMiles = distance * 0.621371;
+      } else {
+        distanceMiles = distance;
+        distanceKm = distance * 1.60934;
+      }
+
+      const paceKm = (totalHours * 60) / distanceKm;
+      const paceMile = (totalHours * 60) / distanceMiles;
+
+      const speedKm = distanceKm / totalHours;
+      const speedMph = distanceMiles / totalHours;
+
+      document.getElementById('paceKm').textContent =
+        formatPace(paceKm);
+
+      document.getElementById('paceMile').textContent =
+        formatPace(paceMile);
+
+      document.getElementById('speedKm').textContent =
+        speedKm.toFixed(2);
+
+      document.getElementById('speedMph').textContent =
+        speedMph.toFixed(2);
+    }
+
+  </script>
+
+</body>
+</html>
