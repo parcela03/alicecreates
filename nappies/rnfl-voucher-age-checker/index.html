@@ -1,1 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RNfL Voucher Age Checker</title>
+  <style>
+    :root {
+      --green: #1f7a4d;
+      --light-green: #e9f7ef;
+      --amber: #fff4d6;
+      --red: #fde2e2;
+      --grey: #f5f5f5;
+      --text: #1f2933;
+      --border: #d0d7de;
+    }
 
+    body {
+      font-family: Arial, sans-serif;
+      background: #f7f8fa;
+      color: var(--text);
+      margin: 0;
+      padding: 24px;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      padding: 28px;
+    }
+
+    h1 {
+      margin-top: 0;
+      color: var(--green);
+      font-size: 1.8rem;
+    }
+
+    p {
+      line-height: 1.5;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-top: 18px;
+      margin-bottom: 6px;
+    }
+
+    input[type="date"] {
+      width: 100%;
+      padding: 12px;
+      font-size: 1rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    button {
+      background: var(--green);
+      color: white;
+      border: none;
+      padding: 12px 18px;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    button.secondary {
+      background: #4b5563;
+    }
+
+    button:hover {
+      opacity: 0.92;
+    }
+
+    .result {
+      margin-top: 24px;
+      padding: 18px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--grey);
+    }
+
+    .eligible {
+      background: var(--light-green);
+      border-color: #90d4b0;
+    }
+
+    .check {
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: 10px;
+      background: white;
+      border: 1px solid var(--border);
+    }
+
+    .yes {
+      color: var(--green);
+      font-weight: bold;
+    }
+
+    .no {
+      color: #b42318;
+      font-weight: bold;
+    }
+
+    .warning {
+      background: var(--amber);
+      border: 1px solid #f2c94c;
+      padding: 12px;
+      border-radius: 10px;
+      margin-top: 16px;
+    }
+
+    .error {
+      background: var(--red);
+      border: 1px solid #f5a3a3;
+      padding: 12px;
+      border-radius: 10px;
+      margin-top: 16px;
+      color: #7a1f1f;
+      font-weight: bold;
+    }
+
+    .small {
+      font-size: 0.9rem;
+      color: #52616b;
+    }
+
+    footer {
+      margin-top: 24px;
+      font-size: 0.85rem;
+      color: #52616b;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container">
+    <h1>Reusable Nappy Voucher Age Checker</h1>
+
+    <p>
+      Enter the child’s date of birth to check whether they are currently
+      <strong>under 18 months</strong> or <strong>under 5 years old</strong>.
+    </p>
+
+    <label for="dob">Child’s date of birth</label>
+    <input type="date" id="dob" />
+
+    <label for="checkDate">Check against date</label>
+    <input type="date" id="checkDate" />
+
+    <div class="button-row">
+      <button onclick="checkEligibility()">Check eligibility</button>
+      <button class="secondary" onclick="resetForm()">Reset</button>
+    </div>
+
+    <div id="output"></div>
+
+    <footer>
+      This calculator checks age only. Full voucher eligibility may also depend on borough, applicant status, and supporting documents.
+    </footer>
+  </main>
+
+  <script>
+    const dobInput = document.getElementById("dob");
+    const checkDateInput = document.getElementById("checkDate");
+    const output = document.getElementById("output");
+
+    const today = new Date();
+    checkDateInput.value = formatDateForInput(today);
+
+    function formatDateForInput(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    function addMonths(date, months) {
+      const result = new Date(date);
+      const originalDay = result.getDate();
+
+      result.setMonth(result.getMonth() + months);
+
+      if (result.getDate() !== originalDay) {
+        result.setDate(0);
+      }
+
+      return result;
+    }
+
+    function calculateAge(dob, checkDate) {
+      let years = checkDate.getFullYear() - dob.getFullYear();
+      let months = checkDate.getMonth() - dob.getMonth();
+      let days = checkDate.getDate() - dob.getDate();
+
+      if (days < 0) {
+        months--;
+        const previousMonth = new Date(checkDate.getFullYear(), checkDate.getMonth(), 0);
+        days += previousMonth.getDate();
+      }
+
+      if (months < 0) {
+        years--;
+        months += 12;
+      }
+
+      return { years, months, days };
+    }
+
+    function plural(value, singular, pluralWord) {
+      return value === 1 ? singular : pluralWord;
+    }
+
+    function checkEligibility() {
+      output.innerHTML = "";
+
+      if (!dobInput.value) {
+        output.innerHTML = `<div class="error">Please enter the child’s date of birth.</div>`;
+        return;
+      }
+
+      const dob = new Date(dobInput.value + "T00:00:00");
+      const checkDate = new Date(checkDateInput.value + "T00:00:00");
+
+      if (dob > checkDate) {
+        output.innerHTML = `<div class="error">The date of birth cannot be after the check date.</div>`;
+        return;
+      }
+
+      const age = calculateAge(dob, checkDate);
+
+      const eighteenMonthCutOff = addMonths(dob, 18);
+      const fiveYearCutOff = addMonths(dob, 60);
+
+      const under18Months = checkDate < eighteenMonthCutOff;
+      const under5Years = checkDate < fiveYearCutOff;
+
+      const totalMonths = age.years * 12 + age.months;
+
+      const resultClass = under18Months || under5Years ? "result eligible" : "result";
+
+      output.innerHTML = `
+        <div class="${resultClass}">
+          <h2>Result</h2>
+
+          <p>
+            Child’s age on <strong>${checkDate.toLocaleDateString("en-GB")}</strong>:
+            <strong>
+              ${age.years} ${plural(age.years, "year", "years")},
+              ${age.months} ${plural(age.months, "month", "months")},
+              ${age.days} ${plural(age.days, "day", "days")}
+            </strong>
+            <br><br>
+            Total age in months:
+            <strong>
+              ${totalMonths} ${plural(totalMonths, "month", "months")}
+              and ${age.days} ${plural(age.days, "day", "days")}
+            </strong>
+          </p>
+
+          <div class="check">
+            <p>Under 18 months?</p>
+            <p class="${under18Months ? "yes" : "no"}">${under18Months ? "Yes" : "No"}</p>
+            <p class="small">
+              18-month cut-off date: ${eighteenMonthCutOff.toLocaleDateString("en-GB")}
+            </p>
+          </div>
+
+          <div class="check">
+            <p>Under 5 years old?</p>
+            <p class="${under5Years ? "yes" : "no"}">${under5Years ? "Yes" : "No"}</p>
+            <p class="small">
+              5-year cut-off date: ${fiveYearCutOff.toLocaleDateString("en-GB")}
+            </p>
+          </div>
+
+          <div class="warning">
+            <strong>Reminder:</strong> For the voucher scheme, the usual route is expectant parents,
+            parents or foster carers with a baby under 18 months. The under-5 check may be relevant
+            where a child requires nappies due to a disability.
+          </div>
+        </div>
+      `;
+    }
+
+    function resetForm() {
+      dobInput.value = "";
+      checkDateInput.value = formatDateForInput(new Date());
+      output.innerHTML = "";
+    }
+  </script>
+</body>
+</html>
