@@ -1,277 +1,83 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Alice Creates</title>
-  <style>
-    :root {
-      --bg: #f7f4ef;
-      --card: #ffffff;
-      --text: #1f2933;
-      --muted: #5b6570;
-      --border: #ded8cf;
-      --accent: #0f766e;
-      --shadow: 0 10px 24px rgba(0,0,0,0.08);
-      --radius: 24px;
-    }
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>BPM Tap Tool</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="app" aria-labelledby="app-title">
+      <section class="workspace">
+        <div class="meter-panel" aria-live="polite">
+          <div class="topline">
+            <h1 id="app-title">BPM Tap Tool</h1>
+            <p id="tempo-name">Waiting for taps</p>
+          </div>
 
-    * {
-      box-sizing: border-box;
-    }
+          <div class="bpm-readout">
+            <span id="bpm-value">--</span>
+            <span>BPM</span>
+          </div>
 
-    body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: linear-gradient(to bottom, #f7f4ef, #eef5f3);
-      color: var(--text);
-      line-height: 1.6;
-    }
+          <div class="pulse-strip" aria-hidden="true">
+            <span class="pulse-dot"></span>
+            <span class="pulse-dot"></span>
+            <span class="pulse-dot"></span>
+            <span class="pulse-dot"></span>
+          </div>
 
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 32px 20px 80px;
-    }
+          <div class="stats">
+            <div>
+              <span>Tap count</span>
+              <strong id="tap-count">0</strong>
+            </div>
+            <div>
+              <span>Last interval</span>
+              <strong id="interval-value">-- ms</strong>
+            </div>
+            <div>
+              <span>Stability</span>
+              <strong id="stability-value">--</strong>
+            </div>
+          </div>
+        </div>
 
-    header {
-      text-align: center;
-      padding: 60px 20px 40px;
-    }
+        <button id="tap-button" class="tap-button" type="button" aria-label="Tap tempo">
+          <span>Tap</span>
+          <small>Space or Enter</small>
+        </button>
+      </section>
 
-    h1 {
-      margin: 0;
-      font-size: clamp(3rem, 8vw, 5.5rem);
-      letter-spacing: -2px;
-      color: var(--accent);
-    }
+      <section class="controls" aria-label="Tempo controls">
+        <div class="control-group">
+          <label for="average-range">Average taps</label>
+          <div class="range-line">
+            <input id="average-range" type="range" min="2" max="16" value="8">
+            <output id="average-output" for="average-range">8</output>
+          </div>
+        </div>
 
-    .intro {
-      max-width: 720px;
-      margin: 20px auto 0;
-      font-size: 1.2rem;
-      color: var(--muted);
-    }
+        <div class="control-group">
+          <span>Display</span>
+          <div class="segmented" role="radiogroup" aria-label="BPM precision">
+            <label>
+              <input type="radio" name="precision" value="0" checked>
+              <span>Whole</span>
+            </label>
+            <label>
+              <input type="radio" name="precision" value="1">
+              <span>Decimal</span>
+            </label>
+          </div>
+        </div>
 
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 24px;
-      margin-top: 40px;
-    }
+        <button id="reset-button" class="icon-button" type="button" title="Reset taps" aria-label="Reset taps">
+          ↺
+        </button>
+      </section>
+    </main>
 
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 28px;
-      box-shadow: var(--shadow);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 16px 32px rgba(0,0,0,0.12);
-    }
-
-    .emoji {
-      font-size: 2rem;
-      margin-bottom: 12px;
-    }
-
-    h2 {
-      margin-top: 0;
-      margin-bottom: 10px;
-      font-size: 1.7rem;
-    }
-
-    .description {
-      color: var(--muted);
-      margin-bottom: 20px;
-    }
-
-    ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    li {
-      padding: 10px 0;
-      border-top: 1px solid #ece7df;
-    }
-
-    li:first-child {
-      border-top: none;
-    }
-
-    a {
-      color: var(--accent);
-      text-decoration: none;
-      font-weight: 700;
-    }
-
-    a:hover {
-      text-decoration: underline;
-    }
-
-    footer {
-      text-align: center;
-      margin-top: 60px;
-      color: var(--muted);
-      font-size: 0.95rem;
-    }
-
-    .coming-soon {
-      opacity: 0.75;
-    }
-
-    .badge {
-      display: inline-block;
-      margin-top: 14px;
-      padding: 6px 12px;
-      border-radius: 999px;
-      background: #e7f5f3;
-      color: var(--accent);
-      font-size: 0.85rem;
-      font-weight: 700;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-
-    <header>
-      <h1>Alice Creates</h1>
-
-      <p class="intro">
-        Interactive tools, learning projects and creative experiments built by Alice Walker.
-      </p>
-    </header>
-
-    <section class="grid">
-
-      <article class="card">
-        <div class="emoji">🇪🇸</div>
-        <h2>Spanish</h2>
-
-        <p class="description">
-          Language learning tools, quizzes and interactive practice games.
-        </p>
-
-        <ul>
-          <li><a href="spanish/">Spanish Learning App</a></li>
-        <!--
-          <li class="coming-soon">Verb Trainer</li>
-          <li class="coming-soon">Vocabulary Flashcards</li>
-          <li class="coming-soon">Speaking Practice</li>
-          <li class="coming-soon">Spanish Quiz Game</li>
-        -->
-        </ul>
-
-        <div class="badge">Currently building</div>
-      </article>
-
-      <article class="card">
-        <div class="emoji">♻️</div>
-        <h2>Nappies</h2>
-
-        <p class="description">
-          Waste prevention and reusable nappy tools.
-        </p>
-
-        <ul>
-          <li><a href="nappies/rnfl-voucher-age-checker/">RNfL Voucher Age Checker</a></li>
-          <li class="coming-soon">Nappy Waste Calculator</li>
-          <li class="coming-soon">Savings Calculator</li>
-          <li class="coming-soon">Waste Reduction Tracker</li>
-        </ul>
-
-        <div class="badge">Real-world tools</div>
-      </article>
-
-      <article class="card">
-        <div class="emoji">🎵</div>
-        <h2>Music</h2>
-
-        <p class="description">
-          Songwriting, rhythm and music practice tools.
-        </p>
-
-        <ul>
-          <li class="coming-soon">Chord Progression Generator</li>
-          <li class="coming-soon">Scale Explorer</li>
-          <li class="coming-soon">BPM Tap Tool</li>
-          <li class="coming-soon">Song Structure Planner</li>
-          <li class="coming-soon">Lyric Prompt Generator</li>
-        </ul>
-
-        <div class="badge">Creative experiments</div>
-      </article>
-
-      <article class="card">
-        <div class="emoji">🏃</div>
-        <h2>Fitness</h2>
-
-        <p class="description">
-          Running, wellness and habit-building tools.
-        </p>
-
-        <ul>
-          <li class="coming-soon">Running Pace Calculator</li>
-          <li class="coming-soon">Workout Planner</li>
-          <li class="coming-soon">Habit Tracker</li>
-          <li class="coming-soon">Heart Rate Zone Tool</li>
-          <li class="coming-soon">Stretch Routine Builder</li>
-        </ul>
-
-        <div class="badge">Health and wellbeing</div>
-      </article>
-
-      <article class="card">
-        <div class="emoji">🧠</div>
-        <h2>Productivity</h2>
-
-        <p class="description">
-          Organisation, focus and planning tools.
-        </p>
-
-        <ul>
-          <li class="coming-soon">Focus Timer</li>
-          <li class="coming-soon">Task Breakdown Tool</li>
-          <li class="coming-soon">Weekly Planner</li>
-          <li class="coming-soon">Brain Dump Organiser</li>
-          <li class="coming-soon">Priority Matrix</li>
-        </ul>
-
-        <div class="badge">ADD-friendly ideas</div>
-      </article>
-
-      <article class="card">
-        <div class="emoji">🌍</div>
-        <h2>Environment</h2>
-
-        <p class="description">
-          Sustainability, reuse and waste reduction projects.
-        </p>
-
-        <ul>
-          <li class="coming-soon">Carbon Comparison Tools</li>
-          <li class="coming-soon">Eco Habit Tracker</li>
-          <li class="coming-soon">Waste Reduction Calculator</li>
-          <li class="coming-soon">Reuse Ideas Generator</li>
-          <li class="coming-soon">Recycling Guide</li>
-        </ul>
-
-        <div class="badge">Sustainability projects</div>
-      </article>
-
-    </section>
-
-    <footer>
-      Built by Alice Walker using HTML, CSS and JavaScript.
-    </footer>
-
-  </div>
-</body>
+    <script src="app.js"></script>
+  </body>
 </html>
