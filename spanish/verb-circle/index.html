@@ -772,7 +772,7 @@
       const verbKey = document.getElementById("verbSelect").value;
       const tense = document.getElementById("tenseSelect").value;
       const subject = subjects.find(item => item.key === subjectKey);
-      const form = getForm(verbKey, subjectKey, tense);
+      const form = getForm(verbKey, subjectKey, tense); speakSpanish(form);
       const meaning = getEnglish(subjectKey, verbKey, tense);
 
       document.querySelectorAll(".subject-card").forEach(card => {
@@ -838,6 +838,16 @@
     populateVerbSelect();
     renderReferenceTables();
     updateCircle();
+    
+function speakSpanish(text) {
+  const speech = new SpeechSynthesisUtterance(text);
+  speech.lang = "es-ES";
+  speech.rate = 0.9;
+  speech.pitch = 1;
+
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(speech);
+}
   </script>
 </body>
 </html>
