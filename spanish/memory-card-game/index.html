@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spanish Memory Card Game</title>
+
+  <style>
+    :root {
+      --bg: #f7f4ef;
+      --card: #ffffff;
+      --text: #1f2933;
+      --muted: #5b6570;
+      --accent: #0f766e;
+      --accent-dark: #0b5d56;
+      --border: #ded8cf;
+      --success: #1b7f3a;
+      --warning: #ef6c00;
+      --shadow: 0 10px 24px rgba(0,0,0,0.08);
+      --radius: 22px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(to bottom, #f7f4ef, #eef5f3);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px 18px 60px;
+    }
+
+    header {
+      text-align: center;
+      padding: 36px 10px 24px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.2rem, 6vw, 4rem);
+      color: var(--accent);
+      letter-spacing: -1px;
+    }
+
+    .intro {
+      max-width: 700px;
+      margin: 14px auto 0;
+      color: var(--muted);
+      font-size: 1.1rem;
+    }
+
+    .top-bar {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 14px;
+      box-shadow: var(--shadow);
+      margin-bottom: 22px;
+      align-items: end;
+    }
+
+    label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    select,
+    button {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      font-size: 1rem;
+    }
+
+    select {
+      background: white;
+    }
+
+    button {
+      cursor: pointer;
+      background: var(--accent);
+      color: white;
+      border: none;
+      font-weight: 700;
+    }
+
+    button:hover {
+      background: var(--accent-dark);
+    }
+
+    .stats {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+
+    .stat {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 8px 14px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      font-weight: 700;
+    }
+
+    .game-board {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .memory-card {
+      position: relative;
+      min-height: 130px;
+      border: none;
+      background: transparent;
+      perspective: 1000px;
+      padding: 0;
+    }
+
+    .memory-card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      min-height: 130px;
+      transition: transform 0.45s;
+      transform-style: preserve-3d;
+    }
+
+    .memory-card.flipped .memory-card-inner,
+    .memory-card.matched .memory-card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .card-face {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      min-height: 130px;
+      backface-visibility: hidden;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 14px;
+      font-weight: 800;
+    }
+
+    .card-back {
+      background: linear-gradient(135deg, #0f766e, #2e7d32);
+      color: white;
+      font-size: 2rem;
+    }
+
+    .card-front {
+      background: white;
+      color: var(--text);
+      transform: rotateY(180deg);
+      font-size: clamp(1rem, 3vw, 1.3rem);
+    }
+
+    .memory-card.matched .card-front {
+      border-color: var(--success);
+      background: #e8f5e9;
+    }
+
+    .message {
+      margin: 24px auto 0;
+      max-width: 720px;
+      text-align: center;
+      padding: 16px;
+      border-radius: 18px;
+      background: white;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      display: none;
+    }
+
+    .message.show {
+      display: block;
+    }
+
+    .small-link {
+      text-align: center;
+      margin-top: 22px;
+    }
+
+    .small-link a {
+      color: var(--accent);
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .small-link a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 760px) {
+      .game-board {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 520px) {
+      .game-board {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .memory-card,
+      .memory-card-inner,
+      .card-face {
+        min-height: 110px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <header>
+      <h1>Spanish Memory Card Game</h1>
+      <p class="intro">
+        Match the Spanish card with its English meaning. Choose a topic, start the game and practise by repetition.
+      </p>
+    </header>
+
+    <section class="top-bar" aria-label="Game controls">
+      <div>
+        <label for="topic">Topic</label>
+        <select id="topic">
+          <option value="daily">Daily Spanish</option>
+          <option value="food">Food and café</option>
+          <option value="verbs">Useful verbs</option>
+          <option value="feelings">Feelings</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="difficulty">Difficulty</label>
+        <select id="difficulty">
+          <option value="easy">Easy: 6 pairs</option>
+          <option value="medium">Medium: 8 pairs</option>
+          <option value="hard">Hard: 10 pairs</option>
+        </select>
+      </div>
+
+      <div>
+        <button onclick="startGame()">Start new game</button>
+      </div>
+    </section>
+
+    <section class="stats" aria-label="Game statistics">
+      <div class="stat">Moves: <span id="moves">0</span></div>
+      <div class="stat">Matches: <span id="matches">0</span></div>
+      <div class="stat">Cards left: <span id="cardsLeft">0</span></div>
+    </section>
+
+    <section id="gameBoard" class="game-board" aria-label="Memory card game board"></section>
+
+    <section id="message" class="message"></section>
+
+    <p class="small-link">
+      <a href="../">← Back to Spanish tools</a>
+    </p>
+  </main>
+
+  <script>
+    const wordSets = {
+      daily: [
+        { es: "Hola", en: "Hello" },
+        { es: "Buenos días", en: "Good morning" },
+        { es: "Buenas noches", en: "Good night" },
+        { es: "Por favor", en: "Please" },
+        { es: "Gracias", en: "Thank you" },
+        { es: "Lo siento", en: "I’m sorry" },
+        { es: "Hasta luego", en: "See you later" },
+        { es: "No entiendo", en: "I don’t understand" },
+        { es: "¿Cómo estás?", en: "How are you?" },
+        { es: "Estoy aprendiendo", en: "I am learning" }
+      ],
+      food: [
+        { es: "Un café", en: "A coffee" },
+        { es: "Agua", en: "Water" },
+        { es: "La cuenta", en: "The bill" },
+        { es: "Una mesa", en: "A table" },
+        { es: "Pan", en: "Bread" },
+        { es: "Queso", en: "Cheese" },
+        { es: "Tortilla", en: "Spanish omelette" },
+        { es: "Me gustaría", en: "I would like" },
+        { es: "Tengo hambre", en: "I am hungry" },
+        { es: "Está rico", en: "It is tasty" }
+      ],
+      verbs: [
+        { es: "Ser", en: "To be: identity" },
+        { es: "Estar", en: "To be: state/location" },
+        { es: "Tener", en: "To have" },
+        { es: "Hacer", en: "To do / make" },
+        { es: "Ir", en: "To go" },
+        { es: "Ver", en: "To see" },
+        { es: "Querer", en: "To want" },
+        { es: "Necesitar", en: "To need" },
+        { es: "Aprender", en: "To learn" },
+        { es: "Practicar", en: "To practise" }
+      ],
+      feelings: [
+        { es: "Estoy feliz", en: "I am happy" },
+        { es: "Estoy cansada", en: "I am tired" },
+        { es: "Estoy nerviosa", en: "I am nervous" },
+        { es: "Estoy tranquila", en: "I am calm" },
+        { es: "Tengo frío", en: "I am cold" },
+        { es: "Tengo calor", en: "I am hot" },
+        { es: "Tengo sueño", en: "I am sleepy" },
+        { es: "Tengo hambre", en: "I am hungry" },
+        { es: "Me siento bien", en: "I feel good" },
+        { es: "Me siento mejor", en: "I feel better" }
+      ]
+    };
+
+    let firstCard = null;
+    let secondCard = null;
+    let lockBoard = false;
+    let moves = 0;
+    let matches = 0;
+    let totalPairs = 0;
+
+    function shuffle(array) {
+      return [...array].sort(() => Math.random() - 0.5);
+    }
+
+    function getPairCount() {
+      const difficulty = document.getElementById("difficulty").value;
+      if (difficulty === "easy") return 6;
+      if (difficulty === "medium") return 8;
+      return 10;
+    }
+
+    function startGame() {
+      const topic = document.getElementById("topic").value;
+      const pairCount = getPairCount();
+      const selectedPairs = shuffle(wordSets[topic]).slice(0, pairCount);
+      const cards = [];
+
+      selectedPairs.forEach((pair, index) => {
+        cards.push({ id: index, text: pair.es, language: "Spanish", match: pair.en });
+        cards.push({ id: index, text: pair.en, language: "English", match: pair.es });
+      });
+
+      firstCard = null;
+      secondCard = null;
+      lockBoard = false;
+      moves = 0;
+      matches = 0;
+      totalPairs = pairCount;
+
+      updateStats();
+      document.getElementById("message").className = "message";
+      document.getElementById("message").textContent = "";
+      renderCards(shuffle(cards));
+    }
+
+    function renderCards(cards) {
+      const board = document.getElementById("gameBoard");
+      board.innerHTML = "";
+
+      cards.forEach((card, index) => {
+        const button = document.createElement("button");
+        button.className = "memory-card";
+        button.type = "button";
+        button.dataset.id = card.id;
+        button.dataset.index = index;
+        button.dataset.text = card.text;
+        button.dataset.language = card.language;
+        button.setAttribute("aria-label", `Hidden ${card.language} card`);
+
+        button.innerHTML = `
+          <div class="memory-card-inner">
+            <div class="card-face card-back">?</div>
+            <div class="card-face card-front">
+              <span>${card.text}</span>
+            </div>
+          </div>
+        `;
+
+        button.addEventListener("click", () => flipCard(button));
+        board.appendChild(button);
+      });
+    }
+
+    function flipCard(card) {
+      if (lockBoard) return;
+      if (card.classList.contains("flipped")) return;
+      if (card.classList.contains("matched")) return;
+
+      card.classList.add("flipped");
+
+      if (!firstCard) {
+        firstCard = card;
+        return;
+      }
+
+      secondCard = card;
+      moves++;
+      updateStats();
+      checkMatch();
+    }
+
+    function checkMatch() {
+      const samePair = firstCard.dataset.id === secondCard.dataset.id;
+      const differentLanguage = firstCard.dataset.language !== secondCard.dataset.language;
+
+      if (samePair && differentLanguage) {
+        firstCard.classList.add("matched");
+        secondCard.classList.add("matched");
+        matches++;
+        resetTurn();
+        updateStats();
+        checkWin();
+      } else {
+        lockBoard = true;
+        setTimeout(() => {
+          firstCard.classList.remove("flipped");
+          secondCard.classList.remove("flipped");
+          resetTurn();
+        }, 900);
+      }
+    }
+
+    function resetTurn() {
+      firstCard = null;
+      secondCard = null;
+      lockBoard = false;
+    }
+
+    function updateStats() {
+      document.getElementById("moves").textContent = moves;
+      document.getElementById("matches").textContent = matches;
+      document.getElementById("cardsLeft").textContent = (totalPairs - matches) * 2;
+    }
+
+    function checkWin() {
+      if (matches === totalPairs) {
+        const message = document.getElementById("message");
+        message.className = "message show";
+        message.innerHTML = `
+          <strong>Well done!</strong><br>
+          You matched all ${totalPairs} pairs in ${moves} moves.
+        `;
+      }
+    }
+
+    startGame();
+  </script>
+</body>
+</html>
