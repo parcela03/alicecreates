@@ -338,26 +338,59 @@
     }
 
     @media (max-width: 640px) {
-      .verb-circle {
-        aspect-ratio: auto;
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 10px;
-        background: transparent;
-      }
 
-      .centre-verb,
-      .subject-card {
-        position: static;
-        width: 100%;
-        min-height: auto;
-        transform: none !important;
-      }
+  .verb-circle {
+    width: 100%;
+    max-width: 360px;
+    margin: 0 auto;
+  }
 
-      .centre-verb {
-        order: -1;
-      }
-    }
+  .subject-card {
+    width: 30%;
+    min-height: 82px;
+    padding: 8px;
+    border-radius: 16px;
+  }
+
+  .subject {
+    font-size: 0.72rem;
+  }
+
+  .conjugation {
+    font-size: 1rem;
+  }
+
+  .translation {
+    font-size: 0.62rem;
+  }
+
+  .centre-verb {
+    width: 40%;
+    min-height: 95px;
+    padding: 10px;
+    border-radius: 18px;
+  }
+
+  .centre-verb .infinitive {
+    font-size: 1.4rem;
+  }
+
+  .centre-verb .meaning {
+    font-size: 0.72rem;
+  }
+
+  .centre-verb .verb-type {
+    font-size: 0.65rem;
+  }
+
+  .focus-box {
+    margin-top: 12px;
+  }
+
+  .focus-sentence {
+    font-size: 1rem;
+  }
+}
   </style>
 </head>
 <body>
