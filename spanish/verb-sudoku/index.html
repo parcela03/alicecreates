@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spanish Verb Sudoku</title>
+
+  <style>
+    :root {
+      --bg: #f7f4ef;
+      --card: #ffffff;
+      --text: #1f2933;
+      --muted: #5b6570;
+      --accent: #0f766e;
+      --accent-dark: #0b5d56;
+      --border: #ded8cf;
+      --present: #e8f5e9;
+      --present-text: #2e7d32;
+      --perfect: #e3f2fd;
+      --perfect-text: #1565c0;
+      --preterite: #fff3e0;
+      --preterite-text: #ef6c00;
+      --imperfect: #f3e5f5;
+      --imperfect-text: #6a1b9a;
+      --success: #1b7f3a;
+      --wrong: #b3261e;
+      --shadow: 0 10px 24px rgba(0,0,0,0.08);
+      --radius: 22px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(to bottom, #f7f4ef, #eef5f3);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 18px 70px;
+    }
+
+    header {
+      text-align: center;
+      padding: 36px 10px 24px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.2rem, 6vw, 4rem);
+      color: var(--accent);
+      letter-spacing: -1px;
+    }
+
+    .intro {
+      max-width: 760px;
+      margin: 14px auto 0;
+      color: var(--muted);
+      font-size: 1.1rem;
+    }
+
+    .controls {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      box-shadow: var(--shadow);
+      margin-bottom: 22px;
+      align-items: end;
+    }
+
+    label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    select,
+    button,
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      font-size: 1rem;
+    }
+
+    select,
+    input {
+      background: white;
+      color: var(--text);
+    }
+
+    button {
+      cursor: pointer;
+      background: var(--accent);
+      color: white;
+      border: none;
+      font-weight: 700;
+    }
+
+    button:hover {
+      background: var(--accent-dark);
+    }
+
+    .secondary {
+      background: #ffffff;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+    }
+
+    .secondary:hover {
+      background: #e7f5f3;
+    }
+
+    .stats {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+
+    .stat {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 8px 14px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      font-weight: 700;
+    }
+
+    .verb-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: var(--shadow);
+      margin-bottom: 22px;
+    }
+
+    .verb-title {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .verb-title h2 {
+      margin: 0;
+      color: var(--accent);
+      font-size: 1.8rem;
+    }
+
+    .meaning {
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 12px 0 18px;
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .pill.present { background: var(--present); color: var(--present-text); }
+    .pill.perfect { background: var(--perfect); color: var(--perfect-text); }
+    .pill.preterite { background: var(--preterite); color: var(--preterite-text); }
+    .pill.imperfect { background: var(--imperfect); color: var(--imperfect-text); }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 860px;
+    }
+
+    th,
+    td {
+      border: 1px solid var(--border);
+      padding: 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f2eee7;
+      font-size: 0.95rem;
+    }
+
+    th.present,
+    td.present { background: var(--present); }
+    th.perfect,
+    td.perfect { background: var(--perfect); }
+    th.preterite,
+    td.preterite { background: var(--preterite); }
+    th.imperfect,
+    td.imperfect { background: var(--imperfect); }
+
+    .answer-input {
+      padding: 10px;
+      border-radius: 10px;
+      border: 2px solid var(--border);
+      font-weight: 700;
+      background: white;
+    }
+
+    .answer-input.correct {
+      border-color: var(--success);
+      background: #e8f5e9;
+    }
+
+    .answer-input.incorrect {
+      border-color: var(--wrong);
+      background: #fdecea;
+    }
+
+    .fixed-answer {
+      font-weight: 800;
+    }
+
+    small {
+      display: block;
+      color: var(--muted);
+      font-weight: 400;
+      margin-top: 3px;
+    }
+
+    .feedback {
+      margin: 20px auto 0;
+      max-width: 760px;
+      text-align: center;
+      padding: 16px;
+      border-radius: 18px;
+      background: white;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      display: none;
+    }
+
+    .feedback.show {
+      display: block;
+    }
+
+    .tips {
+      background: #fff8dc;
+      border-left: 5px solid #f2c94c;
+      border-radius: 16px;
+      padding: 16px;
+      margin-top: 18px;
+      color: var(--text);
+    }
+
+    .small-link {
+      text-align: center;
+      margin-top: 24px;
+    }
+
+    .small-link a {
+      color: var(--accent);
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .small-link a:hover {
+      text-decoration: underline;
+    }
+
+    @media print {
+      .controls,
+      .stats,
+      .small-link,
+      button {
+        display: none !important;
+      }
+
+      body {
+        background: white;
+      }
+
+      .verb-card,
+      .feedback {
+        box-shadow: none;
+      }
+
+      input.answer-input {
+        border: 1px solid #999;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <header>
+      <h1>Spanish Verb Sudoku</h1>
+      <p class="intro">
+        Complete the missing Spanish verb forms. Use the colour-coded tense columns to practise present, present perfect, preterite and imperfect.
+      </p>
+    </header>
+
+    <section class="controls" aria-label="Game controls">
+      <div>
+        <label for="verbSelect">Verb</label>
+        <select id="verbSelect"></select>
+      </div>
+
+      <div>
+        <label for="difficultySelect">Difficulty</label>
+        <select id="difficultySelect">
+          <option value="easy">Easy: 25% missing</option>
+          <option value="medium" selected>Medium: 50% missing</option>
+          <option value="hard">Hard: 75% missing</option>
+        </select>
+      </div>
+
+      <div>
+        <button onclick="newPuzzle()">New puzzle</button>
+      </div>
+
+      <div>
+        <button onclick="checkAnswers()">Check answers</button>
+      </div>
+
+      <div>
+        <button class="secondary" onclick="revealAnswers()">Reveal answers</button>
+      </div>
+
+      <div>
+        <button class="secondary" onclick="window.print()">Print puzzle</button>
+      </div>
+    </section>
+
+    <section class="stats" aria-label="Puzzle statistics">
+      <div class="stat">Missing: <span id="missingCount">0</span></div>
+      <div class="stat">Correct: <span id="correctCount">0</span></div>
+      <div class="stat">Attempts: <span id="attemptCount">0</span></div>
+    </section>
+
+    <section class="verb-card">
+      <div class="verb-title">
+        <div>
+          <h2 id="verbTitle">ser</h2>
+          <div id="verbMeaning" class="meaning">to be</div>
+        </div>
+      </div>
+
+      <div class="legend">
+        <span class="pill present">Present = now / usually</span>
+        <span class="pill perfect">Present perfect = relevant now</span>
+        <span class="pill preterite">Preterite = finished specific time</span>
+        <span class="pill imperfect">Imperfect = background / habit</span>
+      </div>
+
+      <div class="table-wrap">
+        <table id="verbTable"></table>
+      </div>
+
+      <div class="tips">
+        <strong>How to play:</strong> Fill in the empty boxes. Accents matter, but the checker will accept answers without accents too, so <em>limpie</em> can still match <em>limpié</em> while you are learning.
+      </div>
+    </section>
+
+    <section id="feedback" class="feedback"></section>
+
+    <p class="small-link">
+      <a href="alicecreates/">← Back to Spanish tools</a>
+    </p>
+  </main>
+
+  <script>
+    const verbs = {
+      ser: {
+        meaning: "to be — identity, origin, permanent qualities",
+        rows: [
+          ["Yo", "soy", "I am", "he sido", "I have been", "fui", "I was", "era", "I was / used to be"],
+          ["Tú", "eres", "you are", "has sido", "you have been", "fuiste", "you were", "eras", "you were / used to be"],
+          ["Él/Ella", "es", "he/she is", "ha sido", "he/she has been", "fue", "he/she was", "era", "he/she was / used to be"],
+          ["Nosotros/as", "somos", "we are", "hemos sido", "we have been", "fuimos", "we were", "éramos", "we were / used to be"],
+          ["Vosotros/as", "sois", "you all are", "habéis sido", "you all have been", "fuisteis", "you all were", "erais", "you all were / used to be"],
+          ["Ellos/as", "son", "they are", "han sido", "they have been", "fueron", "they were", "eran", "they were / used to be"]
+        ]
+      },
+      estar: {
+        meaning: "to be — location, feelings, temporary states",
+        rows: [
+          ["Yo", "estoy", "I am", "he estado", "I have been", "estuve", "I was", "estaba", "I was / used to be"],
+          ["Tú", "estás", "you are", "has estado", "you have been", "estuviste", "you were", "estabas", "you were / used to be"],
+          ["Él/Ella", "está", "he/she is", "ha estado", "he/she has been", "estuvo", "he/she was", "estaba", "he/she was / used to be"],
+          ["Nosotros/as", "estamos", "we are", "hemos estado", "we have been", "estuvimos", "we were", "estábamos", "we were / used to be"],
+          ["Vosotros/as", "estáis", "you all are", "habéis estado", "you all have been", "estuvisteis", "you all were", "estabais", "you all were / used to be"],
+          ["Ellos/as", "están", "they are", "han estado", "they have been", "estuvieron", "they were", "estaban", "they were / used to be"]
+        ]
+      },
+      tener: {
+        meaning: "to have",
+        rows: [
+          ["Yo", "tengo", "I have", "he tenido", "I have had", "tuve", "I had", "tenía", "I had / used to have"],
+          ["Tú", "tienes", "you have", "has tenido", "you have had", "tuviste", "you had", "tenías", "you had / used to have"],
+          ["Él/Ella", "tiene", "he/she has", "ha tenido", "he/she has had", "tuvo", "he/she had", "tenía", "he/she had / used to have"],
+          ["Nosotros/as", "tenemos", "we have", "hemos tenido", "we have had", "tuvimos", "we had", "teníamos", "we had / used to have"],
+          ["Vosotros/as", "tenéis", "you all have", "habéis tenido", "you all have had", "tuvisteis", "you all had", "teníais", "you all had / used to have"],
+          ["Ellos/as", "tienen", "they have", "han tenido", "they have had", "tuvieron", "they had", "tenían", "they had / used to have"]
+        ]
+      },
+      hacer: {
+        meaning: "to do / to make",
+        rows: [
+          ["Yo", "hago", "I do / make", "he hecho", "I have done / made", "hice", "I did / made", "hacía", "I used to do / make"],
+          ["Tú", "haces", "you do / make", "has hecho", "you have done / made", "hiciste", "you did / made", "hacías", "you used to do / make"],
+          ["Él/Ella", "hace", "he/she does / makes", "ha hecho", "he/she has done / made", "hizo", "he/she did / made", "hacía", "he/she used to do / make"],
+          ["Nosotros/as", "hacemos", "we do / make", "hemos hecho", "we have done / made", "hicimos", "we did / made", "hacíamos", "we used to do / make"],
+          ["Vosotros/as", "hacéis", "you all do / make", "habéis hecho", "you all have done / made", "hicisteis", "you all did / made", "hacíais", "you all used to do / make"],
+          ["Ellos/as", "hacen", "they do / make", "han hecho", "they have done / made", "hicieron", "they did / made", "hacían", "they used to do / make"]
+        ]
+      },
+      ir: {
+        meaning: "to go",
+        rows: [
+          ["Yo", "voy", "I go", "he ido", "I have gone", "fui", "I went", "iba", "I used to go"],
+          ["Tú", "vas", "you go", "has ido", "you have gone", "fuiste", "you went", "ibas", "you used to go"],
+          ["Él/Ella", "va", "he/she goes", "ha ido", "he/she has gone", "fue", "he/she went", "iba", "he/she used to go"],
+          ["Nosotros/as", "vamos", "we go", "hemos ido", "we have gone", "fuimos", "we went", "íbamos", "we used to go"],
+          ["Vosotros/as", "vais", "you all go", "habéis ido", "you all have gone", "fuisteis", "you all went", "ibais", "you all used to go"],
+          ["Ellos/as", "van", "they go", "han ido", "they have gone", "fueron", "they went", "iban", "they used to go"]
+        ]
+      },
+      limpiar: {
+        meaning: "to clean",
+        rows: [
+          ["Yo", "limpio", "I clean", "he limpiado", "I have cleaned", "limpié", "I cleaned", "limpiaba", "I used to clean"],
+          ["Tú", "limpias", "you clean", "has limpiado", "you have cleaned", "limpiaste", "you cleaned", "limpiabas", "you used to clean"],
+          ["Él/Ella", "limpia", "he/she cleans", "ha limpiado", "he/she has cleaned", "limpió", "he/she cleaned", "limpiaba", "he/she used to clean"],
+          ["Nosotros/as", "limpiamos", "we clean", "hemos limpiado", "we have cleaned", "limpiamos", "we cleaned", "limpiábamos", "we used to clean"],
+          ["Vosotros/as", "limpiáis", "you all clean", "habéis limpiado", "you all have cleaned", "limpiasteis", "you all cleaned", "limpiabais", "you all used to clean"],
+          ["Ellos/as", "limpian", "they clean", "han limpiado", "they have cleaned", "limpiaron", "they cleaned", "limpiaban", "they used to clean"]
+        ]
+      },
+      practicar: {
+        meaning: "to practise",
+        rows: [
+          ["Yo", "practico", "I practise", "he practicado", "I have practised", "practiqué", "I practised", "practicaba", "I used to practise"],
+          ["Tú", "practicas", "you practise", "has practicado", "you have practised", "practicaste", "you practised", "practicabas", "you used to practise"],
+          ["Él/Ella", "practica", "he/she practises", "ha practicado", "he/she has practised", "practicó", "he/she practised", "practicaba", "he/she used to practise"],
+          ["Nosotros/as", "practicamos", "we practise", "hemos practicado", "we have practised", "practicamos", "we practised", "practicábamos", "we used to practise"],
+          ["Vosotros/as", "practicáis", "you all practise", "habéis practicado", "you all have practised", "practicasteis", "you all practised", "practicabais", "you all used to practise"],
+          ["Ellos/as", "practican", "they practise", "han practicado", "they have practised", "practicaron", "they practised", "practicaban", "they used to practise"]
+        ]
+      }
+    };
+
+    const tenseColumns = [
+      { key: "present", label: "Present", formIndex: 1, englishIndex: 2 },
+      { key: "perfect", label: "Present Perfect", formIndex: 3, englishIndex: 4 },
+      { key: "preterite", label: "Preterite", formIndex: 5, englishIndex: 6 },
+      { key: "imperfect", label: "Imperfect", formIndex: 7, englishIndex: 8 }
+    ];
+
+    let hiddenCells = new Set();
+    let attempts = 0;
+
+    function populateVerbs() {
+      const select = document.getElementById("verbSelect");
+      Object.keys(verbs).forEach(verb => {
+        const option = document.createElement("option");
+        option.value = verb;
+        option.textContent = verb;
+        select.appendChild(option);
+      });
+    }
+
+    function getMissingRatio() {
+      const difficulty = document.getElementById("difficultySelect").value;
+      if (difficulty === "easy") return 0.25;
+      if (difficulty === "medium") return 0.5;
+      return 0.75;
+    }
+
+    function shuffle(array) {
+      return [...array].sort(() => Math.random() - 0.5);
+    }
+
+    function newPuzzle() {
+      const verb = document.getElementById("verbSelect").value;
+      const data = verbs[verb];
+      const allCells = [];
+
+      data.rows.forEach((row, rowIndex) => {
+        tenseColumns.forEach(col => {
+          allCells.push(`${rowIndex}-${col.key}`);
+        });
+      });
+
+      const missingTotal = Math.round(allCells.length * getMissingRatio());
+      hiddenCells = new Set(shuffle(allCells).slice(0, missingTotal));
+      attempts = 0;
+
+      document.getElementById("verbTitle").textContent = verb;
+      document.getElementById("verbMeaning").textContent = data.meaning;
+      document.getElementById("feedback").className = "feedback";
+      document.getElementById("feedback").textContent = "";
+
+      renderTable();
+      updateStats();
+    }
+
+    function renderTable() {
+      const verb = document.getElementById("verbSelect").value;
+      const data = verbs[verb];
+      const table = document.getElementById("verbTable");
+
+      table.innerHTML = `
+        <thead>
+          <tr>
+            <th>Subject</th>
+            ${tenseColumns.map(col => `<th class="${col.key}">${col.label}</th>`).join("")}
+          </tr>
+        </thead>
+        <tbody>
+          ${data.rows.map((row, rowIndex) => `
+            <tr>
+              <td><strong>${row[0]}</strong></td>
+              ${tenseColumns.map(col => renderCell(row, rowIndex, col)).join("")}
+            </tr>
+          `).join("")}
+        </tbody>
+      `;
+    }
+
+    function renderCell(row, rowIndex, col) {
+      const cellId = `${rowIndex}-${col.key}`;
+      const answer = row[col.formIndex];
+      const english = row[col.englishIndex];
+
+      if (hiddenCells.has(cellId)) {
+        return `
+          <td class="${col.key}">
+            <input
+              class="answer-input"
+              data-answer="${answer}"
+              aria-label="${row[0]} ${col.label} answer"
+              placeholder="Type Spanish"
+            >
+            <small>${english}</small>
+          </td>
+        `;
+      }
+
+      return `
+        <td class="${col.key}">
+          <span class="fixed-answer">${answer}</span>
+          <small>${english}</small>
+        </td>
+      `;
+    }
+
+    function normalise(text) {
+      return text
+        .toLowerCase()
+        .trim()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/\s+/g, " ");
+    }
+
+    function checkAnswers() {
+      attempts++;
+      let correct = 0;
+      const inputs = document.querySelectorAll(".answer-input");
+
+      inputs.forEach(input => {
+        const userAnswer = normalise(input.value);
+        const correctAnswer = normalise(input.dataset.answer);
+
+        input.classList.remove("correct", "incorrect");
+
+        if (userAnswer && userAnswer === correctAnswer) {
+          input.classList.add("correct");
+          correct++;
+        } else {
+          input.classList.add("incorrect");
+        }
+      });
+
+      updateStats(correct);
+      showFeedback(correct, inputs.length);
+    }
+
+    function revealAnswers() {
+      const inputs = document.querySelectorAll(".answer-input");
+      inputs.forEach(input => {
+        input.value = input.dataset.answer;
+        input.classList.remove("incorrect");
+        input.classList.add("correct");
+      });
+      updateStats(inputs.length);
+      const feedback = document.getElementById("feedback");
+      feedback.className = "feedback show";
+      feedback.innerHTML = "Answers revealed. Read each row out loud to practise the pattern.";
+    }
+
+    function updateStats(correctOverride = null) {
+      const inputs = document.querySelectorAll(".answer-input");
+      const correct = correctOverride ?? document.querySelectorAll(".answer-input.correct").length;
+      document.getElementById("missingCount").textContent = inputs.length;
+      document.getElementById("correctCount").textContent = correct;
+      document.getElementById("attemptCount").textContent = attempts;
+    }
+
+    function showFeedback(correct, total) {
+      const feedback = document.getElementById("feedback");
+      feedback.className = "feedback show";
+
+      if (correct === total) {
+        feedback.innerHTML = `<strong>Excellent!</strong><br>You completed the puzzle correctly.`;
+      } else {
+        feedback.innerHTML = `<strong>${correct} out of ${total} correct.</strong><br>Check the highlighted boxes and try again.`;
+      }
+    }
+
+    document.getElementById("verbSelect").addEventListener("change", newPuzzle);
+    document.getElementById("difficultySelect").addEventListener("change", newPuzzle);
+
+    populateVerbs();
+    newPuzzle();
+  </script>
+</body>
+</html>
