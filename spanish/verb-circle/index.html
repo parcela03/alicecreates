@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spanish Verb Circle</title>
+
+  <style>
+    :root {
+      --bg: #f7f4ef;
+      --card: #ffffff;
+      --text: #1f2933;
+      --muted: #5b6570;
+      --border: #ded8cf;
+      --accent: #0f766e;
+      --accent-dark: #0b5d56;
+      --present: #2e7d32;
+      --present-soft: #e8f5e9;
+      --perfect: #1565c0;
+      --perfect-soft: #e3f2fd;
+      --preterite: #ef6c00;
+      --preterite-soft: #fff3e0;
+      --imperfect: #6a1b9a;
+      --imperfect-soft: #f3e5f5;
+      --shadow: 0 10px 24px rgba(0,0,0,0.08);
+      --radius: 24px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(to bottom, #f7f4ef, #eef5f3);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 18px 70px;
+    }
+
+    header {
+      text-align: center;
+      padding: 34px 10px 24px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.2rem, 6vw, 4rem);
+      color: var(--accent);
+      letter-spacing: -1px;
+    }
+
+    .intro {
+      max-width: 780px;
+      margin: 14px auto 0;
+      color: var(--muted);
+      font-size: 1.1rem;
+    }
+
+    .controls {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+      align-items: end;
+    }
+
+    label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    select,
+    button {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      font-size: 1rem;
+    }
+
+    select {
+      background: white;
+      color: var(--text);
+    }
+
+    button {
+      cursor: pointer;
+      background: var(--accent);
+      color: white;
+      border: none;
+      font-weight: 700;
+    }
+
+    button:hover {
+      background: var(--accent-dark);
+    }
+
+    .secondary {
+      background: white;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+    }
+
+    .secondary:hover {
+      background: #e7f5f3;
+    }
+
+    .main-layout {
+      display: grid;
+      grid-template-columns: minmax(280px, 1.2fr) minmax(280px, 0.8fr);
+      gap: 24px;
+      align-items: start;
+    }
+
+    .circle-card,
+    .reference-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .tense-banner {
+      text-align: center;
+      padding: 12px 16px;
+      border-radius: 18px;
+      font-weight: 800;
+      margin-bottom: 18px;
+    }
+
+    .tense-present .tense-banner { background: var(--present-soft); color: var(--present); }
+    .tense-perfect .tense-banner { background: var(--perfect-soft); color: var(--perfect); }
+    .tense-preterite .tense-banner { background: var(--preterite-soft); color: var(--preterite); }
+    .tense-imperfect .tense-banner { background: var(--imperfect-soft); color: var(--imperfect); }
+
+    .verb-circle {
+      position: relative;
+      width: min(680px, 100%);
+      aspect-ratio: 1 / 1;
+      margin: 0 auto;
+      border-radius: 50%;
+      background: radial-gradient(circle, #ffffff 0%, #ffffff 42%, #f2eee7 43%, #f2eee7 46%, transparent 47%);
+    }
+
+    .centre-verb {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 38%;
+      min-height: 130px;
+      border-radius: 28px;
+      background: white;
+      border: 2px solid var(--accent);
+      box-shadow: 0 10px 26px rgba(0,0,0,0.12);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 16px;
+    }
+
+    .centre-verb .infinitive {
+      font-size: clamp(1.8rem, 5vw, 3rem);
+      color: var(--accent);
+      font-weight: 900;
+      text-transform: uppercase;
+      line-height: 1;
+    }
+
+    .centre-verb .meaning {
+      margin-top: 8px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .centre-verb .verb-type {
+      margin-top: 8px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #e7f5f3;
+      color: var(--accent);
+      font-size: 0.9rem;
+      font-weight: 800;
+    }
+
+    .subject-card {
+      position: absolute;
+      width: 28%;
+      min-height: 100px;
+      border-radius: 22px;
+      background: white;
+      border: 1px solid var(--border);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .subject-card:hover,
+    .subject-card.active {
+      transform: scale(1.04);
+      box-shadow: 0 12px 26px rgba(0,0,0,0.14);
+    }
+
+    .subject {
+      color: var(--muted);
+      font-weight: 800;
+      font-size: 0.95rem;
+    }
+
+    .conjugation {
+      font-size: clamp(1.15rem, 3vw, 1.65rem);
+      font-weight: 900;
+      margin: 4px 0;
+    }
+
+    .translation {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .tense-present .conjugation { color: var(--present); }
+    .tense-perfect .conjugation { color: var(--perfect); }
+    .tense-preterite .conjugation { color: var(--preterite); }
+    .tense-imperfect .conjugation { color: var(--imperfect); }
+
+    .pos-tu { top: 0; left: 50%; transform: translateX(-50%); }
+    .pos-el { top: 28%; left: 0; }
+    .pos-ellos { top: 28%; right: 0; }
+    .pos-yo { bottom: 0; left: 20%; }
+    .pos-nosotros { bottom: 0; right: 20%; }
+    .pos-vosotros { bottom: 22%; left: 50%; transform: translateX(-50%); }
+
+    .pos-tu:hover,
+    .pos-tu.active,
+    .pos-vosotros:hover,
+    .pos-vosotros.active {
+      transform: translateX(-50%) scale(1.04);
+    }
+
+    .focus-box {
+      margin-top: 20px;
+      padding: 16px;
+      border-radius: 18px;
+      background: #fff8dc;
+      border-left: 5px solid #f2c94c;
+    }
+
+    .focus-box h3 {
+      margin: 0 0 8px;
+      color: var(--accent);
+    }
+
+    .focus-sentence {
+      font-size: 1.3rem;
+      font-weight: 900;
+      margin: 8px 0 4px;
+    }
+
+    .reference-card h2 {
+      margin-top: 0;
+      color: var(--accent);
+    }
+
+    .reference-section {
+      margin-bottom: 20px;
+    }
+
+    .reference-section h3 {
+      margin-bottom: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+      overflow: hidden;
+      border-radius: 14px;
+    }
+
+    th,
+    td {
+      border: 1px solid var(--border);
+      padding: 8px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f2eee7;
+    }
+
+    .present-cell { background: var(--present-soft); color: var(--present); font-weight: 800; }
+    .perfect-cell { background: var(--perfect-soft); color: var(--perfect); font-weight: 800; }
+    .preterite-cell { background: var(--preterite-soft); color: var(--preterite); font-weight: 800; }
+    .imperfect-cell { background: var(--imperfect-soft); color: var(--imperfect); font-weight: 800; }
+
+    .small-link {
+      text-align: center;
+      margin-top: 24px;
+    }
+
+    .small-link a {
+      color: var(--accent);
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .small-link a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 900px) {
+      .main-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .verb-circle {
+        aspect-ratio: auto;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+        background: transparent;
+      }
+
+      .centre-verb,
+      .subject-card {
+        position: static;
+        width: 100%;
+        min-height: auto;
+        transform: none !important;
+      }
+
+      .centre-verb {
+        order: -1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <header>
+      <h1>Spanish Verb Circle</h1>
+      <p class="intro">
+        Picture each subject sitting around a table, with the verb in the middle. Click each subject to hear the pattern in your mind and build memory through position, colour and repetition.
+      </p>
+    </header>
+
+    <section class="controls" aria-label="Verb circle controls">
+      <div>
+        <label for="verbSelect">Verb</label>
+        <select id="verbSelect"></select>
+      </div>
+
+      <div>
+        <label for="tenseSelect">Tense</label>
+        <select id="tenseSelect">
+          <option value="present">Present</option>
+          <option value="perfect">Present Perfect</option>
+          <option value="preterite">Preterite</option>
+          <option value="imperfect">Imperfect</option>
+        </select>
+      </div>
+
+      <div>
+        <button onclick="shuffleVerb()">Random verb</button>
+      </div>
+
+      <div>
+        <button class="secondary" onclick="toggleReference()">Show / hide reference</button>
+      </div>
+    </section>
+
+    <section id="appWrap" class="main-layout tense-present">
+      <section class="circle-card">
+        <div id="tenseBanner" class="tense-banner">Present = now / usually</div>
+
+        <div class="verb-circle" aria-label="Spanish verb circle">
+          <div class="centre-verb">
+            <div id="centreInfinitive" class="infinitive">hablar</div>
+            <div id="centreMeaning" class="meaning">to speak</div>
+            <div id="centreType" class="verb-type">-AR verb</div>
+          </div>
+
+          <button class="subject-card pos-tu" data-subject="tu" onclick="selectSubject('tu')">
+            <span class="subject">Tú</span>
+            <span class="conjugation" id="tuForm">hablas</span>
+            <span class="translation" id="tuTranslation">you speak</span>
+          </button>
+
+          <button class="subject-card pos-el" data-subject="el" onclick="selectSubject('el')">
+            <span class="subject">Él / Ella</span>
+            <span class="conjugation" id="elForm">habla</span>
+            <span class="translation" id="elTranslation">he/she speaks</span>
+          </button>
+
+          <button class="subject-card pos-ellos" data-subject="ellos" onclick="selectSubject('ellos')">
+            <span class="subject">Ellos / Ellas</span>
+            <span class="conjugation" id="ellosForm">hablan</span>
+            <span class="translation" id="ellosTranslation">they speak</span>
+          </button>
+
+          <button class="subject-card pos-yo" data-subject="yo" onclick="selectSubject('yo')">
+            <span class="subject">Yo</span>
+            <span class="conjugation" id="yoForm">hablo</span>
+            <span class="translation" id="yoTranslation">I speak</span>
+          </button>
+
+          <button class="subject-card pos-nosotros" data-subject="nosotros" onclick="selectSubject('nosotros')">
+            <span class="subject">Nosotros/as</span>
+            <span class="conjugation" id="nosotrosForm">hablamos</span>
+            <span class="translation" id="nosotrosTranslation">we speak</span>
+          </button>
+
+          <button class="subject-card pos-vosotros" data-subject="vosotros" onclick="selectSubject('vosotros')">
+            <span class="subject">Vosotros/as</span>
+            <span class="conjugation" id="vosotrosForm">habláis</span>
+            <span class="translation" id="vosotrosTranslation">you all speak</span>
+          </button>
+        </div>
+
+        <div class="focus-box">
+          <h3>Focus card</h3>
+          <div id="focusSubject">Click a subject around the table.</div>
+          <div id="focusSentence" class="focus-sentence">Yo hablo</div>
+          <div id="focusMeaning">I speak</div>
+        </div>
+      </section>
+
+      <aside id="referenceCard" class="reference-card">
+        <h2>Regular Verb Reference</h2>
+        <p>
+          These tables show the regular -AR, -ER and -IR endings used by the circle. Ser and estar are included as irregular verbs in the dropdown.
+        </p>
+
+        <div id="referenceTables"></div>
+      </aside>
+    </section>
+
+    <p class="small-link">
+      <a href="/alicecreates/">← Back to homepage</a>
+    </p>
+  </main>
+
+  <script>
+    const subjects = [
+      { key: "yo", label: "Yo", english: "I" },
+      { key: "tu", label: "Tú", english: "you" },
+      { key: "el", label: "Él / Ella", english: "he/she" },
+      { key: "nosotros", label: "Nosotros/as", english: "we" },
+      { key: "vosotros", label: "Vosotros/as", english: "you all" },
+      { key: "ellos", label: "Ellos / Ellas", english: "they" }
+    ];
+
+    const verbs = {
+      ser: {
+        type: "irregular",
+        meaning: "to be — identity, origin, permanent qualities",
+        englishBase: "be",
+        forms: {
+          present: {
+            yo: "soy",
+            tu: "eres",
+            el: "es",
+            nosotros: "somos",
+            vosotros: "sois",
+            ellos: "son"
+          },
+          perfect: {
+            yo: "he sido",
+            tu: "has sido",
+            el: "ha sido",
+            nosotros: "hemos sido",
+            vosotros: "habéis sido",
+            ellos: "han sido"
+          },
+          preterite: {
+            yo: "fui",
+            tu: "fuiste",
+            el: "fue",
+            nosotros: "fuimos",
+            vosotros: "fuisteis",
+            ellos: "fueron"
+          },
+          imperfect: {
+            yo: "era",
+            tu: "eras",
+            el: "era",
+            nosotros: "éramos",
+            vosotros: "erais",
+            ellos: "eran"
+          }
+        },
+        english: {
+          present: {
+            yo: "I am",
+            tu: "you are",
+            el: "he/she is",
+            nosotros: "we are",
+            vosotros: "you all are",
+            ellos: "they are"
+          },
+          perfect: {
+            yo: "I have been",
+            tu: "you have been",
+            el: "he/she has been",
+            nosotros: "we have been",
+            vosotros: "you all have been",
+            ellos: "they have been"
+          },
+          preterite: {
+            yo: "I was",
+            tu: "you were",
+            el: "he/she was",
+            nosotros: "we were",
+            vosotros: "you all were",
+            ellos: "they were"
+          },
+          imperfect: {
+            yo: "I was / used to be",
+            tu: "you were / used to be",
+            el: "he/she was / used to be",
+            nosotros: "we were / used to be",
+            vosotros: "you all were / used to be",
+            ellos: "they were / used to be"
+          }
+        }
+      },
+
+      estar: {
+        type: "irregular",
+        meaning: "to be — location, feelings, temporary states",
+        englishBase: "be",
+        forms: {
+          present: {
+            yo: "estoy",
+            tu: "estás",
+            el: "está",
+            nosotros: "estamos",
+            vosotros: "estáis",
+            ellos: "están"
+          },
+          perfect: {
+            yo: "he estado",
+            tu: "has estado",
+            el: "ha estado",
+            nosotros: "hemos estado",
+            vosotros: "habéis estado",
+            ellos: "han estado"
+          },
+          preterite: {
+            yo: "estuve",
+            tu: "estuviste",
+            el: "estuvo",
+            nosotros: "estuvimos",
+            vosotros: "estuvisteis",
+            ellos: "estuvieron"
+          },
+          imperfect: {
+            yo: "estaba",
+            tu: "estabas",
+            el: "estaba",
+            nosotros: "estábamos",
+            vosotros: "estabais",
+            ellos: "estaban"
+          }
+        },
+        english: {
+          present: {
+            yo: "I am",
+            tu: "you are",
+            el: "he/she is",
+            nosotros: "we are",
+            vosotros: "you all are",
+            ellos: "they are"
+          },
+          perfect: {
+            yo: "I have been",
+            tu: "you have been",
+            el: "he/she has been",
+            nosotros: "we have been",
+            vosotros: "you all have been",
+            ellos: "they have been"
+          },
+          preterite: {
+            yo: "I was",
+            tu: "you were",
+            el: "he/she was",
+            nosotros: "we were",
+            vosotros: "you all were",
+            ellos: "they were"
+          },
+          imperfect: {
+            yo: "I was / used to be",
+            tu: "you were / used to be",
+            el: "he/she was / used to be",
+            nosotros: "we were / used to be",
+            vosotros: "you all were / used to be",
+            ellos: "they were / used to be"
+          }
+        }
+      },
+
+      hablar: { type: "ar", stem: "habl", meaning: "to speak", englishBase: "speak" },
+      limpiar: { type: "ar", stem: "limpi", meaning: "to clean", englishBase: "clean" },
+      practicar: { type: "ar", stem: "practic", meaning: "to practise", englishBase: "practise", preteriteYo: "practiqué" },
+      tocar: { type: "ar", stem: "toc", meaning: "to play / touch", englishBase: "play", preteriteYo: "toqué" },
+      comer: { type: "er", stem: "com", meaning: "to eat", englishBase: "eat" },
+      aprender: { type: "er", stem: "aprend", meaning: "to learn", englishBase: "learn" },
+      beber: { type: "er", stem: "beb", meaning: "to drink", englishBase: "drink" },
+      vivir: { type: "ir", stem: "viv", meaning: "to live", englishBase: "live" },
+      escribir: { type: "ir", stem: "escrib", meaning: "to write", englishBase: "write" },
+      abrir: { type: "ir", stem: "abr", meaning: "to open", englishBase: "open" }
+    };
+
+    const endings = {
+      ar: {
+        present: { yo: "o", tu: "as", el: "a", nosotros: "amos", vosotros: "áis", ellos: "an" },
+        perfect: { participle: "ado" },
+        preterite: { yo: "é", tu: "aste", el: "ó", nosotros: "amos", vosotros: "asteis", ellos: "aron" },
+        imperfect: { yo: "aba", tu: "abas", el: "aba", nosotros: "ábamos", vosotros: "abais", ellos: "aban" }
+      },
+      er: {
+        present: { yo: "o", tu: "es", el: "e", nosotros: "emos", vosotros: "éis", ellos: "en" },
+        perfect: { participle: "ido" },
+        preterite: { yo: "í", tu: "iste", el: "ió", nosotros: "imos", vosotros: "isteis", ellos: "ieron" },
+        imperfect: { yo: "ía", tu: "ías", el: "ía", nosotros: "íamos", vosotros: "íais", ellos: "ían" }
+      },
+      ir: {
+        present: { yo: "o", tu: "es", el: "e", nosotros: "imos", vosotros: "ís", ellos: "en" },
+        perfect: { participle: "ido" },
+        preterite: { yo: "í", tu: "iste", el: "ió", nosotros: "imos", vosotros: "isteis", ellos: "ieron" },
+        imperfect: { yo: "ía", tu: "ías", el: "ía", nosotros: "íamos", vosotros: "íais", ellos: "ían" }
+      }
+    };
+
+    const haber = {
+      yo: "he",
+      tu: "has",
+      el: "ha",
+      nosotros: "hemos",
+      vosotros: "habéis",
+      ellos: "han"
+    };
+
+    const tenseLabels = {
+      present: "Present = now / usually",
+      perfect: "Present perfect = relevant now",
+      preterite: "Preterite = finished specific time",
+      imperfect: "Imperfect = background / habit"
+    };
+
+    function populateVerbSelect() {
+      const select = document.getElementById("verbSelect");
+
+      Object.keys(verbs).forEach(verb => {
+        const option = document.createElement("option");
+        option.value = verb;
+        option.textContent = `${verb} — ${verbs[verb].meaning}`;
+        select.appendChild(option);
+      });
+    }
+
+    function getForm(verbKey, subjectKey, tense) {
+      const verb = verbs[verbKey];
+
+      if (verb.type === "irregular") {
+        return verb.forms[tense][subjectKey];
+      }
+
+      const group = endings[verb.type];
+
+      if (tense === "perfect") {
+        return `${haber[subjectKey]} ${verb.stem}${group.perfect.participle}`;
+      }
+
+      if (tense === "preterite" && subjectKey === "yo" && verb.preteriteYo) {
+        return verb.preteriteYo;
+      }
+
+      return `${verb.stem}${group[tense][subjectKey]}`;
+    }
+
+    function getEnglish(subjectKey, verbKey, tense) {
+      const verb = verbs[verbKey];
+
+      if (verb.type === "irregular") {
+        return verb.english[tense][subjectKey];
+      }
+
+      const subject = subjects.find(item => item.key === subjectKey);
+      const base = verb.englishBase;
+
+      if (tense === "present") {
+        if (subjectKey === "el") return `${subject.english} ${base}s`;
+        return `${subject.english} ${base}`;
+      }
+
+      if (tense === "perfect") {
+        return `${subject.english} have ${pastParticipleEnglish(base)}`.replace("he/she have", "he/she has");
+      }
+
+      if (tense === "preterite") {
+        return `${subject.english} ${pastEnglish(base)}`;
+      }
+
+      return `${subject.english} used to ${base}`;
+    }
+
+    function pastParticipleEnglish(base) {
+      const irregular = {
+        eat: "eaten",
+        write: "written",
+        drink: "drunk"
+      };
+      return irregular[base] || `${base}d`.replace("practised", "practised").replace("cleand", "cleaned").replace("playd", "played").replace("learnd", "learned").replace("opend", "opened");
+    }
+
+    function pastEnglish(base) {
+      const irregular = {
+        eat: "ate",
+        write: "wrote",
+        drink: "drank"
+      };
+      return irregular[base] || pastParticipleEnglish(base);
+    }
+
+    function updateCircle() {
+      const verbKey = document.getElementById("verbSelect").value;
+      const tense = document.getElementById("tenseSelect").value;
+      const verb = verbs[verbKey];
+      const appWrap = document.getElementById("appWrap");
+
+      appWrap.className = `main-layout tense-${tense}`;
+      document.getElementById("tenseBanner").textContent = tenseLabels[tense];
+      document.getElementById("centreInfinitive").textContent = verbKey;
+      document.getElementById("centreMeaning").textContent = verb.meaning;
+      document.getElementById("centreType").textContent = verb.type === "irregular" ? "Irregular verb" : `-${verb.type.toUpperCase()} verb`;
+
+      subjects.forEach(subject => {
+        document.getElementById(`${subject.key}Form`).textContent = getForm(verbKey, subject.key, tense);
+        document.getElementById(`${subject.key}Translation`).textContent = getEnglish(subject.key, verbKey, tense);
+      });
+
+      selectSubject("yo");
+    }
+
+    function selectSubject(subjectKey) {
+      const verbKey = document.getElementById("verbSelect").value;
+      const tense = document.getElementById("tenseSelect").value;
+      const subject = subjects.find(item => item.key === subjectKey);
+      const form = getForm(verbKey, subjectKey, tense);
+      const meaning = getEnglish(subjectKey, verbKey, tense);
+
+      document.querySelectorAll(".subject-card").forEach(card => {
+        card.classList.remove("active");
+      });
+
+      document.querySelector(`[data-subject="${subjectKey}"]`).classList.add("active");
+      document.getElementById("focusSubject").textContent = `${subject.label} is speaking from their seat at the table.`;
+      document.getElementById("focusSentence").textContent = `${subject.label} ${form}`;
+      document.getElementById("focusMeaning").textContent = meaning;
+    }
+
+    function shuffleVerb() {
+      const verbKeys = Object.keys(verbs);
+      const randomVerb = verbKeys[Math.floor(Math.random() * verbKeys.length)];
+      document.getElementById("verbSelect").value = randomVerb;
+      updateCircle();
+    }
+
+    function toggleReference() {
+      const reference = document.getElementById("referenceCard");
+      reference.style.display = reference.style.display === "none" ? "block" : "none";
+    }
+
+    function renderReferenceTables() {
+      const container = document.getElementById("referenceTables");
+      const groups = ["ar", "er", "ir"];
+
+      container.innerHTML = groups.map(group => {
+        return `
+          <div class="reference-section">
+            <h3>-${group.toUpperCase()} endings</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Subject</th>
+                  <th class="present-cell">Present</th>
+                  <th class="perfect-cell">Present Perfect</th>
+                  <th class="preterite-cell">Preterite</th>
+                  <th class="imperfect-cell">Imperfect</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${subjects.map(subject => `
+                  <tr>
+                    <td><strong>${subject.label}</strong></td>
+                    <td class="present-cell">${endings[group].present[subject.key]}</td>
+                    <td class="perfect-cell">${haber[subject.key]} + ${endings[group].perfect.participle}</td>
+                    <td class="preterite-cell">${endings[group].preterite[subject.key]}</td>
+                    <td class="imperfect-cell">${endings[group].imperfect[subject.key]}</td>
+                  </tr>
+                `).join("")}
+              </tbody>
+            </table>
+          </div>
+        `;
+      }).join("");
+    }
+
+    document.getElementById("verbSelect").addEventListener("change", updateCircle);
+    document.getElementById("tenseSelect").addEventListener("change", updateCircle);
+
+    populateVerbSelect();
+    renderReferenceTables();
+    updateCircle();
+  </script>
+</body>
+</html>
