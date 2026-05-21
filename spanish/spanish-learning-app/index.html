@@ -433,9 +433,7 @@
       </div>
       <div id="diaryMessage" class="feedback"></div>
     </section>
-    <p class="small-link">
-      <a href="/alicecreates/">← Back to homepage</a>
-    </p>
+    
 
 <section id="days" class="panel">
   <h2>Time Expressions</h2>
@@ -443,17 +441,17 @@
 
   <div class="grid">
     <div class="card">
-      <label>Choose a time expression</label>
+      <label>1. Choose a time expression</label>
       <select id="timeExpressionSelect"></select>
     </div>
 
     <div class="card">
-      <label>Choose an activity</label>
+      <label>2. Choose an activity</label>
       <select id="timeActivitySelect"></select>
     </div>
 
     <div class="card">
-      <label>Suggested tense</label>
+      <label>3. Choose or check the tense</label>
       <select id="timeTenseSelect">
         <option value="present">Present</option>
         <option value="perfect">Present Perfect</option>
@@ -488,6 +486,7 @@
 
   <div class="card" style="margin-top:16px;">
     <h3>Days of the Week Reference</h3>
+    
     <p class="muted">In Spanish, days of the week are usually written in lowercase.</p>
 
     <div style="overflow-x:auto;">
@@ -538,9 +537,80 @@
         </tbody>
       </table>
     </div>
+    </div>
+  
+    <div class="card" style="margin-top:16px;">
+  <h3>Time Expressions Reference</h3>
+
+  <p class="muted">
+    These expressions often help signal which tense to use in Spanish.
+  </p>
+
+  <div style="overflow-x:auto;">
+    <table>
+      <thead>
+        <tr>
+          <th>English</th>
+          <th>Spanish</th>
+          <th>Typical Tense</th>
+          <th>Example</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        <tr>
+          <td>Today</td>
+          <td><strong>hoy</strong></td>
+          <td class="perfect">Present Perfect</td>
+          <td>Hoy he practicado español.</td>
+        </tr>
+
+        <tr>
+          <td>Yesterday</td>
+          <td><strong>ayer</strong></td>
+          <td class="preterite">Preterite</td>
+          <td>Ayer practiqué español.</td>
+        </tr>
+
+        <tr>
+          <td>Normally</td>
+          <td><strong>normalmente</strong></td>
+          <td class="present">Present</td>
+          <td>Normalmente practico español.</td>
+        </tr>
+
+        <tr>
+          <td>Tomorrow</td>
+          <td><strong>mañana</strong></td>
+          <td class="present">Near Future</td>
+          <td>Mañana voy a cocinar.</td>
+        </tr>
+
+        <tr>
+          <td>When I was little</td>
+          <td><strong>cuando era pequeña</strong></td>
+          <td class="imperfect">Imperfect</td>
+          <td>Cuando era pequeña tocaba la guitarra.</td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note" style="margin-top:16px;">
+    <strong>Tense reminder:</strong><br>
+    Present = routines / now<br>
+    Present Perfect = relevant now<br>
+    Preterite = finished event<br>
+    Imperfect = background / habitual past
+  </div>
   </div>
 </section>
 
+
+
+    
 <section id="numbers" class="panel">
   <h2>Numbers Practice</h2>
   <p>Practise recognising and writing Spanish numbers in real-life contexts.</p>
@@ -583,6 +653,9 @@
   </div>
 </section>
 
+    <p class="small-link">
+  <a href="/alicecreates/">← Back to homepage</a>
+</p>
     
   </main>
 
@@ -1080,7 +1153,13 @@ function populateDaysPractice() {
     activitySelect.add(new Option(item.label, JSON.stringify(item)));
   });
 
+  
   expressionSelect.addEventListener("change", updateSuggestedTense);
+
+activitySelect.addEventListener("change", buildTimeSentence);
+
+document.getElementById("timeTenseSelect")
+  .addEventListener("change", buildTimeSentence);
 }
 
 function updateSuggestedTense() {
@@ -1112,12 +1191,13 @@ function newTimeChallenge() {
   const challenge = document.getElementById("timeChallenge");
 
   challenge.classList.add("show");
-  challenge.innerHTML = `
-    Translate this into Spanish:<br>
-    <strong>${expression.en}, ${activity.en[tense]}.</strong><br><br>
-    Suggested tense: <strong>${tense}</strong><br>
-    Hint: <em>${expression.note}</em>
-  `;
+ challenge.innerHTML = `
+  Translate this into Spanish:<br>
+  <strong>${expression.en}, ${activity.en[tense]}.</strong><br><br>
+  Suggested tense: <strong>${tense}</strong><br>
+  Hint: <em>${expression.note}</em><br><br>
+  <strong>Answer:</strong> ${expression.es}, ${activity[tense]}.
+`;
 
   document.getElementById("timeExpressionSelect").value = JSON.stringify(expression);
   document.getElementById("timeActivitySelect").value = JSON.stringify(activity);
