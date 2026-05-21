@@ -287,7 +287,7 @@
       <button class="tab-button" data-tab="quiz">Quick Quiz</button>
       <button class="tab-button" data-tab="tenses">Tense Chooser</button>
       <button class="tab-button" data-tab="verbs">Verb Tables</button>
-      <button class="tab-button" data-tab="days">Days of the Week</button>
+      <button class="tab-button" data-tab="days">Time Expressions</button>
       <button class="tab-button" data-tab="numbers">Numbers</button>
       <button class="tab-button" data-tab="sentences">Sentence Builder</button>
       <button class="tab-button" data-tab="diary">Mini Diary</button>
@@ -438,42 +438,106 @@
     </p>
 
 <section id="days" class="panel">
-  <h2>Days & Sentences</h2>
-  <p>Practise using days of the week in fuller Spanish sentences.</p>
+  <h2>Time Expressions</h2>
+  <p>Practise using Spanish time expressions with the right tense.</p>
 
   <div class="grid">
     <div class="card">
-      <label>Choose a day</label>
-      <select id="daySelect"></select>
-    </div>
-
-    <div class="card">
-      <label>Choose a time phrase</label>
-      <select id="dayTimeSelect"></select>
+      <label>Choose a time expression</label>
+      <select id="timeExpressionSelect"></select>
     </div>
 
     <div class="card">
       <label>Choose an activity</label>
-      <select id="dayActivitySelect"></select>
+      <select id="timeActivitySelect"></select>
+    </div>
+
+    <div class="card">
+      <label>Suggested tense</label>
+      <select id="timeTenseSelect">
+        <option value="present">Present</option>
+        <option value="perfect">Present Perfect</option>
+        <option value="preterite">Preterite</option>
+        <option value="imperfect">Imperfect</option>
+        <option value="future">Near Future</option>
+      </select>
     </div>
   </div>
 
   <div class="card" style="margin-top:16px;">
     <h3>Your sentence</h3>
-    <p class="large-spanish" id="daySentenceSpanish"></p>
-    <p class="large-english" id="daySentenceEnglish"></p>
+    <p class="large-spanish" id="timeSentenceSpanish"></p>
+    <p class="large-english" id="timeSentenceEnglish"></p>
 
     <div class="button-row">
-      <button class="primary" onclick="buildDaySentence()">Build sentence</button>
-      <button onclick="speakSpanish(document.getElementById('daySentenceSpanish').textContent)">Hear sentence</button>
-      <button onclick="newDayChallenge()">Challenge me</button>
+      <button class="primary" onclick="buildTimeSentence()">Build sentence</button>
+      <button onclick="speakSpanish(document.getElementById('timeSentenceSpanish').textContent)">Hear sentence</button>
+      <button onclick="newTimeChallenge()">Challenge me</button>
     </div>
 
-    <div id="dayChallenge" class="feedback"></div>
+    <div id="timeChallenge" class="feedback"></div>
   </div>
 
   <div class="note">
-    <strong>Useful rule:</strong> In Spanish, days of the week are not usually capitalised. Use <em>el lunes</em> for “on Monday” and <em>los lunes</em> for “on Mondays”.
+    <strong>Useful rule:</strong> Time expressions often help you choose the tense.
+    <em>Hoy</em> often uses the present perfect when the result matters now.
+    <em>Ayer</em> usually uses the preterite.
+    <em>Normalmente</em> usually uses the present.
+    <em>Cuando era pequeña</em> often uses the imperfect.
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <h3>Days of the Week Reference</h3>
+    <p class="muted">In Spanish, days of the week are usually written in lowercase.</p>
+
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>English</th>
+            <th>Spanish</th>
+            <th>Example</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Monday</td>
+            <td><strong>lunes</strong></td>
+            <td>el lunes / los lunes</td>
+          </tr>
+          <tr>
+            <td>Tuesday</td>
+            <td><strong>martes</strong></td>
+            <td>el martes / los martes</td>
+          </tr>
+          <tr>
+            <td>Wednesday</td>
+            <td><strong>miércoles</strong></td>
+            <td>el miércoles / los miércoles</td>
+          </tr>
+          <tr>
+            <td>Thursday</td>
+            <td><strong>jueves</strong></td>
+            <td>el jueves / los jueves</td>
+          </tr>
+          <tr>
+            <td>Friday</td>
+            <td><strong>viernes</strong></td>
+            <td>el viernes / los viernes</td>
+          </tr>
+          <tr>
+            <td>Saturday</td>
+            <td><strong>sábado</strong></td>
+            <td>el sábado / los sábados</td>
+          </tr>
+          <tr>
+            <td>Sunday</td>
+            <td><strong>domingo</strong></td>
+            <td>el domingo / los domingos</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </section>
 
@@ -821,67 +885,243 @@
       box.textContent = message;
       box.classList.add("show");
     }
-const days = [
-  { es: "lunes", en: "Monday" },
-  { es: "martes", en: "Tuesday" },
-  { es: "miércoles", en: "Wednesday" },
-  { es: "jueves", en: "Thursday" },
-  { es: "viernes", en: "Friday" },
-  { es: "sábado", en: "Saturday" },
-  { es: "domingo", en: "Sunday" }
+const timeExpressions = [
+  {
+    es: "Hoy",
+    en: "Today",
+    suggestedTense: "perfect",
+    note: "Use present perfect when the result is relevant now."
+  },
+  {
+    es: "Esta mañana",
+    en: "This morning",
+    suggestedTense: "perfect",
+    note: "Often present perfect if you are still within the same day."
+  },
+  {
+    es: "Esta semana",
+    en: "This week",
+    suggestedTense: "perfect",
+    note: "Often present perfect because the time period is still open."
+  },
+  {
+    es: "Ya",
+    en: "Already",
+    suggestedTense: "perfect",
+    note: "Often used with present perfect."
+  },
+  {
+    es: "Ayer",
+    en: "Yesterday",
+    suggestedTense: "preterite",
+    note: "Use preterite for a finished specific time."
+  },
+  {
+    es: "Anteayer",
+    en: "The day before yesterday",
+    suggestedTense: "preterite",
+    note: "Use preterite for a finished past time."
+  },
+  {
+    es: "El lunes pasado",
+    en: "Last Monday",
+    suggestedTense: "preterite",
+    note: "Use preterite for a specific finished day."
+  },
+  {
+    es: "La semana pasada",
+    en: "Last week",
+    suggestedTense: "preterite",
+    note: "Use preterite for a finished past period."
+  },
+  {
+    es: "Normalmente",
+    en: "Normally",
+    suggestedTense: "present",
+    note: "Use present for routines and habits."
+  },
+  {
+    es: "Cada lunes",
+    en: "Every Monday",
+    suggestedTense: "present",
+    note: "Use present for repeated routines."
+  },
+  {
+    es: "Los lunes",
+    en: "On Mondays",
+    suggestedTense: "present",
+    note: "Use present for repeated weekly habits."
+  },
+  {
+    es: "Mañana",
+    en: "Tomorrow",
+    suggestedTense: "future",
+    note: "Use near future: voy a + infinitive."
+  },
+  {
+    es: "Pasado mañana",
+    en: "The day after tomorrow",
+    suggestedTense: "future",
+    note: "Use near future: voy a + infinitive."
+  },
+  {
+    es: "El próximo lunes",
+    en: "Next Monday",
+    suggestedTense: "future",
+    note: "Use near future for planned future actions."
+  },
+  {
+    es: "La próxima semana",
+    en: "Next week",
+    suggestedTense: "future",
+    note: "Use near future for planned future actions."
+  },
+  {
+    es: "Cuando era pequeña",
+    en: "When I was little",
+    suggestedTense: "imperfect",
+    note: "Use imperfect for background, habits and repeated past actions."
+  },
+  {
+    es: "Antes",
+    en: "Before / in the past",
+    suggestedTense: "imperfect",
+    note: "Use imperfect for what used to happen."
+  }
 ];
 
-const dayTimes = [
-  { es: "El", en: "On" },
-  { es: "Los", en: "On every" },
-  { es: "El próximo", en: "Next" },
-  { es: "El pasado", en: "Last" }
-];
-
-const dayActivities = [
-  { es: "practico español", en: "I practise Spanish" },
-  { es: "voy a correr", en: "I am going running" },
-  { es: "toco la guitarra", en: "I play guitar" },
-  { es: "trabajo desde casa", en: "I work from home" },
-  { es: "cocino con mi familia", en: "I cook with my family" },
-  { es: "he estudiado los verbos", en: "I have studied the verbs" }
+const timeActivities = [
+  {
+    label: "practise Spanish",
+    present: "practico español",
+    perfect: "he practicado español",
+    preterite: "practiqué español",
+    imperfect: "practicaba español",
+    future: "voy a practicar español",
+    en: {
+      present: "I practise Spanish",
+      perfect: "I have practised Spanish",
+      preterite: "I practised Spanish",
+      imperfect: "I used to practise Spanish",
+      future: "I am going to practise Spanish"
+    }
+  },
+  {
+    label: "go running",
+    present: "voy a correr",
+    perfect: "he ido a correr",
+    preterite: "fui a correr",
+    imperfect: "iba a correr",
+    future: "voy a ir a correr",
+    en: {
+      present: "I go running",
+      perfect: "I have gone running",
+      preterite: "I went running",
+      imperfect: "I used to go running",
+      future: "I am going to go running"
+    }
+  },
+  {
+    label: "play guitar",
+    present: "toco la guitarra",
+    perfect: "he tocado la guitarra",
+    preterite: "toqué la guitarra",
+    imperfect: "tocaba la guitarra",
+    future: "voy a tocar la guitarra",
+    en: {
+      present: "I play guitar",
+      perfect: "I have played guitar",
+      preterite: "I played guitar",
+      imperfect: "I used to play guitar",
+      future: "I am going to play guitar"
+    }
+  },
+  {
+    label: "cook dinner",
+    present: "cocino la cena",
+    perfect: "he cocinado la cena",
+    preterite: "cociné la cena",
+    imperfect: "cocinaba la cena",
+    future: "voy a cocinar la cena",
+    en: {
+      present: "I cook dinner",
+      perfect: "I have cooked dinner",
+      preterite: "I cooked dinner",
+      imperfect: "I used to cook dinner",
+      future: "I am going to cook dinner"
+    }
+  },
+  {
+    label: "work from home",
+    present: "trabajo desde casa",
+    perfect: "he trabajado desde casa",
+    preterite: "trabajé desde casa",
+    imperfect: "trabajaba desde casa",
+    future: "voy a trabajar desde casa",
+    en: {
+      present: "I work from home",
+      perfect: "I have worked from home",
+      preterite: "I worked from home",
+      imperfect: "I used to work from home",
+      future: "I am going to work from home"
+    }
+  }
 ];
 
 function populateDaysPractice() {
-  const daySelect = document.getElementById("daySelect");
-  const timeSelect = document.getElementById("dayTimeSelect");
-  const activitySelect = document.getElementById("dayActivitySelect");
+  const expressionSelect = document.getElementById("timeExpressionSelect");
+  const activitySelect = document.getElementById("timeActivitySelect");
 
-  days.forEach(day => daySelect.add(new Option(`${day.es} — ${day.en}`, JSON.stringify(day))));
-  dayTimes.forEach(item => timeSelect.add(new Option(`${item.es} — ${item.en}`, JSON.stringify(item))));
-  dayActivities.forEach(item => activitySelect.add(new Option(`${item.es} — ${item.en}`, JSON.stringify(item))));
+  timeExpressions.forEach(item => {
+    expressionSelect.add(new Option(`${item.es} — ${item.en}`, JSON.stringify(item)));
+  });
+
+  timeActivities.forEach(item => {
+    activitySelect.add(new Option(item.label, JSON.stringify(item)));
+  });
+
+  expressionSelect.addEventListener("change", updateSuggestedTense);
 }
 
-function buildDaySentence() {
-  const day = JSON.parse(document.getElementById("daySelect").value);
-  const time = JSON.parse(document.getElementById("dayTimeSelect").value);
-  const activity = JSON.parse(document.getElementById("dayActivitySelect").value);
-
-  const pluralDay = time.es === "Los";
-  const daySpanish = pluralDay ? `${day.es}s` : day.es;
-
-  document.getElementById("daySentenceSpanish").textContent =
-    `${time.es} ${daySpanish}, ${activity.es}.`;
-
-  document.getElementById("daySentenceEnglish").textContent =
-    `${time.en} ${day.en}${pluralDay ? "s" : ""}, ${activity.en}.`;
+function updateSuggestedTense() {
+  const expression = JSON.parse(document.getElementById("timeExpressionSelect").value);
+  document.getElementById("timeTenseSelect").value = expression.suggestedTense;
+  buildTimeSentence();
 }
 
-function newDayChallenge() {
-  const day = randomItem(days);
-  const challenge = document.getElementById("dayChallenge");
+function buildTimeSentence() {
+  const expression = JSON.parse(document.getElementById("timeExpressionSelect").value);
+  const activity = JSON.parse(document.getElementById("timeActivitySelect").value);
+  const tense = document.getElementById("timeTenseSelect").value;
+
+  document.getElementById("timeSentenceSpanish").textContent =
+    `${expression.es}, ${activity[tense]}.`;
+
+  document.getElementById("timeSentenceEnglish").textContent =
+    `${expression.en}, ${activity.en[tense]}.`;
+
+  const challenge = document.getElementById("timeChallenge");
+  challenge.classList.add("show");
+  challenge.innerHTML = `<strong>Why this tense?</strong> ${expression.note}`;
+}
+
+function newTimeChallenge() {
+  const expression = randomItem(timeExpressions);
+  const activity = randomItem(timeActivities);
+  const tense = expression.suggestedTense;
+  const challenge = document.getElementById("timeChallenge");
 
   challenge.classList.add("show");
   challenge.innerHTML = `
     Translate this into Spanish:<br>
-    <strong>On ${day.en}, I practise Spanish.</strong><br><br>
-    Hint: Use <em>El ${day.es}</em>.
+    <strong>${expression.en}, ${activity.en[tense]}.</strong><br><br>
+    Suggested tense: <strong>${tense}</strong><br>
+    Hint: <em>${expression.note}</em>
   `;
+
+  document.getElementById("timeExpressionSelect").value = JSON.stringify(expression);
+  document.getElementById("timeActivitySelect").value = JSON.stringify(activity);
+  document.getElementById("timeTenseSelect").value = tense;
 }
 
     const numberContexts = [
@@ -1018,7 +1258,7 @@ renderVerbTable();
 populateSentenceBuilder();
 buildSentence();
 populateDaysPractice();
-buildDaySentence();
+buildTimeSentence();
 populateNumberPractice();
 newNumberChallenge();
 buildNumberSentence();
