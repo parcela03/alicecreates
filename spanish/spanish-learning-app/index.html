@@ -287,6 +287,8 @@
       <button class="tab-button" data-tab="quiz">Quick Quiz</button>
       <button class="tab-button" data-tab="tenses">Tense Chooser</button>
       <button class="tab-button" data-tab="verbs">Verb Tables</button>
+      <button class="tab-button" data-tab="days">Days & Sentences</button>
+      <button class="tab-button" data-tab="numbers">Numbers Practice</button>
       <button class="tab-button" data-tab="sentences">Sentence Builder</button>
       <button class="tab-button" data-tab="diary">Mini Diary</button>
     </nav>
@@ -434,6 +436,90 @@
     <p class="small-link">
       <a href="/alicecreates/">← Back to homepage</a>
     </p>
+
+<section id="days" class="panel">
+  <h2>Days & Sentences</h2>
+  <p>Practise using days of the week in fuller Spanish sentences.</p>
+
+  <div class="grid">
+    <div class="card">
+      <label>Choose a day</label>
+      <select id="daySelect"></select>
+    </div>
+
+    <div class="card">
+      <label>Choose a time phrase</label>
+      <select id="dayTimeSelect"></select>
+    </div>
+
+    <div class="card">
+      <label>Choose an activity</label>
+      <select id="dayActivitySelect"></select>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <h3>Your sentence</h3>
+    <p class="large-spanish" id="daySentenceSpanish"></p>
+    <p class="large-english" id="daySentenceEnglish"></p>
+
+    <div class="button-row">
+      <button class="primary" onclick="buildDaySentence()">Build sentence</button>
+      <button onclick="speakSpanish(document.getElementById('daySentenceSpanish').textContent)">Hear sentence</button>
+      <button onclick="newDayChallenge()">Challenge me</button>
+    </div>
+
+    <div id="dayChallenge" class="feedback"></div>
+  </div>
+
+  <div class="note">
+    <strong>Useful rule:</strong> In Spanish, days of the week are not usually capitalised. Use <em>el lunes</em> for “on Monday” and <em>los lunes</em> for “on Mondays”.
+  </div>
+</section>
+
+<section id="numbers" class="panel">
+  <h2>Numbers Practice</h2>
+  <p>Practise recognising and writing Spanish numbers in real-life contexts.</p>
+
+  <div class="grid">
+    <div class="card">
+      <h3>Number challenge</h3>
+      <p class="large-spanish" id="numberPrompt">--</p>
+      <p class="large-english" id="numberHint">Write this number in Spanish.</p>
+
+      <input id="numberAnswer" type="text" placeholder="Type the Spanish number">
+      
+      <div class="button-row">
+        <button class="primary" onclick="checkNumberAnswer()">Check answer</button>
+        <button onclick="newNumberChallenge()">New number</button>
+        <button onclick="speakSpanish(document.getElementById('numberCorrect').textContent)">Hear answer</button>
+      </div>
+
+      <div id="numberFeedback" class="feedback"></div>
+      <p id="numberCorrect" hidden></p>
+    </div>
+
+    <div class="card">
+      <h3>Sentence mode</h3>
+      <p>Use numbers inside useful Spanish sentences.</p>
+
+      <label>Choose context</label>
+      <select id="numberContext"></select>
+
+      <label>Choose number</label>
+      <input id="sentenceNumber" type="number" min="0" max="999" value="25">
+
+      <div class="button-row">
+        <button class="primary" onclick="buildNumberSentence()">Build sentence</button>
+      </div>
+
+      <p class="large-spanish" id="numberSentenceSpanish"></p>
+      <p class="large-english" id="numberSentenceEnglish"></p>
+    </div>
+  </div>
+</section>
+
+    
   </main>
 
 
@@ -735,15 +821,212 @@
       box.textContent = message;
       box.classList.add("show");
     }
+const days = [
+  { es: "lunes", en: "Monday" },
+  { es: "martes", en: "Tuesday" },
+  { es: "miércoles", en: "Wednesday" },
+  { es: "jueves", en: "Thursday" },
+  { es: "viernes", en: "Friday" },
+  { es: "sábado", en: "Saturday" },
+  { es: "domingo", en: "Sunday" }
+];
 
-    renderVerbOptions();
-    renderVerbTable();
-    populateSentenceBuilder();
-    buildSentence();
-    newFlashcard();
-    newQuizQuestion();
-    newTenseQuestion();
-    updateProgress();
+const dayTimes = [
+  { es: "El", en: "On" },
+  { es: "Los", en: "On every" },
+  { es: "El próximo", en: "Next" },
+  { es: "El pasado", en: "Last" }
+];
+
+const dayActivities = [
+  { es: "practico español", en: "I practise Spanish" },
+  { es: "voy a correr", en: "I am going running" },
+  { es: "toco la guitarra", en: "I play guitar" },
+  { es: "trabajo desde casa", en: "I work from home" },
+  { es: "cocino con mi familia", en: "I cook with my family" },
+  { es: "he estudiado los verbos", en: "I have studied the verbs" }
+];
+
+function populateDaysPractice() {
+  const daySelect = document.getElementById("daySelect");
+  const timeSelect = document.getElementById("dayTimeSelect");
+  const activitySelect = document.getElementById("dayActivitySelect");
+
+  days.forEach(day => daySelect.add(new Option(`${day.es} — ${day.en}`, JSON.stringify(day))));
+  dayTimes.forEach(item => timeSelect.add(new Option(`${item.es} — ${item.en}`, JSON.stringify(item))));
+  dayActivities.forEach(item => activitySelect.add(new Option(`${item.es} — ${item.en}`, JSON.stringify(item))));
+}
+
+function buildDaySentence() {
+  const day = JSON.parse(document.getElementById("daySelect").value);
+  const time = JSON.parse(document.getElementById("dayTimeSelect").value);
+  const activity = JSON.parse(document.getElementById("dayActivitySelect").value);
+
+  const pluralDay = time.es === "Los";
+  const daySpanish = pluralDay ? `${day.es}s` : day.es;
+
+  document.getElementById("daySentenceSpanish").textContent =
+    `${time.es} ${daySpanish}, ${activity.es}.`;
+
+  document.getElementById("daySentenceEnglish").textContent =
+    `${time.en} ${day.en}${pluralDay ? "s" : ""}, ${activity.en}.`;
+}
+
+function newDayChallenge() {
+  const day = randomItem(days);
+  const challenge = document.getElementById("dayChallenge");
+
+  challenge.classList.add("show");
+  challenge.innerHTML = `
+    Translate this into Spanish:<br>
+    <strong>On ${day.en}, I practise Spanish.</strong><br><br>
+    Hint: Use <em>El ${day.es}</em>.
+  `;
+}
+
+    const numberContexts = [
+  {
+    es: "Tengo {number} años.",
+    en: "I am {number} years old."
+  },
+  {
+    es: "Quiero {number} cafés.",
+    en: "I want {number} coffees."
+  },
+  {
+    es: "Hay {number} personas.",
+    en: "There are {number} people."
+  },
+  {
+    es: "La clase empieza a las {number}.",
+    en: "The class starts at {number}."
+  },
+  {
+    es: "He practicado durante {number} minutos.",
+    en: "I have practised for {number} minutes."
+  }
+];
+
+const spanishNumbers = {
+  0: "cero", 1: "uno", 2: "dos", 3: "tres", 4: "cuatro", 5: "cinco",
+  6: "seis", 7: "siete", 8: "ocho", 9: "nueve", 10: "diez",
+  11: "once", 12: "doce", 13: "trece", 14: "catorce", 15: "quince",
+  16: "dieciséis", 17: "diecisiete", 18: "dieciocho", 19: "diecinueve",
+  20: "veinte", 21: "veintiuno", 22: "veintidós", 23: "veintitrés",
+  24: "veinticuatro", 25: "veinticinco", 26: "veintiséis",
+  27: "veintisiete", 28: "veintiocho", 29: "veintinueve",
+  30: "treinta", 40: "cuarenta", 50: "cincuenta", 60: "sesenta",
+  70: "setenta", 80: "ochenta", 90: "noventa", 100: "cien"
+};
+
+let currentNumber = 0;
+
+function numberToSpanish(num) {
+  num = Number(num);
+
+  if (spanishNumbers[num]) return spanishNumbers[num];
+
+  if (num < 100) {
+    const tens = Math.floor(num / 10) * 10;
+    const ones = num % 10;
+    return `${spanishNumbers[tens]} y ${spanishNumbers[ones]}`;
+  }
+
+  if (num === 100) return "cien";
+
+  if (num < 200) {
+    return `ciento ${numberToSpanish(num - 100)}`;
+  }
+
+  if (num < 1000) {
+    const hundredsMap = {
+      2: "doscientos",
+      3: "trescientos",
+      4: "cuatrocientos",
+      5: "quinientos",
+      6: "seiscientos",
+      7: "setecientos",
+      8: "ochocientos",
+      9: "novecientos"
+    };
+
+    const hundreds = Math.floor(num / 100);
+    const remainder = num % 100;
+
+    return remainder === 0
+      ? hundredsMap[hundreds]
+      : `${hundredsMap[hundreds]} ${numberToSpanish(remainder)}`;
+  }
+
+  return "number too high";
+}
+
+function normaliseText(text) {
+  return text
+    .toLowerCase()
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ");
+}
+
+function populateNumberPractice() {
+  const select = document.getElementById("numberContext");
+
+  numberContexts.forEach((context, index) => {
+    select.add(new Option(context.en, index));
+  });
+}
+
+function newNumberChallenge() {
+  currentNumber = Math.floor(Math.random() * 999);
+  document.getElementById("numberPrompt").textContent = currentNumber;
+  document.getElementById("numberAnswer").value = "";
+  document.getElementById("numberFeedback").className = "feedback";
+  document.getElementById("numberCorrect").textContent = numberToSpanish(currentNumber);
+}
+
+function checkNumberAnswer() {
+  const userAnswer = document.getElementById("numberAnswer").value;
+  const correctAnswer = numberToSpanish(currentNumber);
+  const feedback = document.getElementById("numberFeedback");
+
+  feedback.classList.add("show");
+
+  if (normaliseText(userAnswer) === normaliseText(correctAnswer)) {
+    feedback.innerHTML = `<strong>Correct!</strong> ${currentNumber} = ${correctAnswer}`;
+  } else {
+    feedback.innerHTML = `<strong>Not quite.</strong> ${currentNumber} = ${correctAnswer}`;
+  }
+}
+
+function buildNumberSentence() {
+  const number = Number(document.getElementById("sentenceNumber").value);
+  const contextIndex = document.getElementById("numberContext").value;
+  const context = numberContexts[contextIndex];
+  const spanishNumber = numberToSpanish(number);
+
+  document.getElementById("numberSentenceSpanish").textContent =
+    context.es.replace("{number}", spanishNumber);
+
+  document.getElementById("numberSentenceEnglish").textContent =
+    context.en.replace("{number}", number);
+}
+    
+renderVerbOptions();
+renderVerbTable();
+populateSentenceBuilder();
+buildSentence();
+populateDaysPractice();
+buildDaySentence();
+populateNumberPractice();
+newNumberChallenge();
+buildNumberSentence();
+newFlashcard();
+newQuizQuestion();
+newTenseQuestion();    
+updateProgress();
+    
   </script>
 </body>
 </html>
