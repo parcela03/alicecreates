@@ -33,11 +33,12 @@
       text-align: center;
       color: #5b6570;
       margin-bottom: 24px;
+      line-height: 1.5;
     }
 
     .mode-buttons {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr 1fr 1fr;
       gap: 12px;
       margin-bottom: 24px;
     }
@@ -70,7 +71,8 @@
       font-weight: bold;
     }
 
-    input, select {
+    input,
+    select {
       width: 100%;
       box-sizing: border-box;
       padding: 12px;
@@ -100,6 +102,7 @@
       color: #5b6570;
       font-size: 0.9rem;
       margin-top: 6px;
+      line-height: 1.4;
     }
 
     .results {
@@ -127,6 +130,7 @@
       font-size: 2rem;
       font-weight: bold;
       color: #0f766e;
+      line-height: 1.2;
     }
 
     .summary {
@@ -138,13 +142,14 @@
       color: #065f46;
       font-weight: bold;
       text-align: center;
+      line-height: 1.5;
     }
 
     .hidden {
       display: none;
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 700px) {
       .grid,
       .results,
       .mode-buttons {
@@ -169,59 +174,104 @@
     <h1>🏃 Running Pace Calculator</h1>
 
     <p class="intro" id="introText">
-      Calculate your running pace and speed from distance and time.
+      Calculate running pace, finish time, and speed from race distance and pace goals.
     </p>
 
     <div class="mode-buttons">
+
       <button id="checkModeBtn" class="active" onclick="setMode('check')">
-        Check my pace
+        Check Pace
       </button>
 
       <button id="planModeBtn" onclick="setMode('plan')">
-        What pace do I need?
+        Pace Needed
       </button>
+
+      <button id="timeModeBtn" onclick="setMode('time')">
+        Predict Time
+      </button>
+
     </div>
 
     <div class="grid">
 
       <div class="full">
-        <label>Distance</label>
-        <input type="number" id="distance" placeholder="e.g. 5" min="0" step="0.01">
+        <label>Race distance</label>
+
+        <input
+          type="number"
+          id="distance"
+          placeholder="Enter race distance"
+          min="0"
+          step="0.01"
+        >
+
+        <div class="helper">
+          Enter any race distance up to a full marathon (42.195 km / 26.219 miles).
+        </div>
       </div>
 
       <div class="full">
-        <label>Unit</label>
+        <label>Distance unit</label>
+
         <select id="unit">
           <option value="km">Kilometres</option>
           <option value="miles">Miles</option>
         </select>
       </div>
 
-      <div class="full" id="goalPresetBox">
-        <label>Choose a common distance</label>
-        <select id="presetDistance" onchange="applyPresetDistance()">
-          <option value="">Select optional preset</option>
-          <option value="5">5K</option>
-          <option value="10">10K</option>
-          <option value="21.0975">Half marathon</option>
-          <option value="42.195">Marathon</option>
-        </select>
-        <div class="helper">This fills the distance in kilometres.</div>
+      <!-- TIME INPUTS -->
+
+      <div id="timeInputs">
+
+        <div class="grid">
+
+          <div>
+            <label>Hours</label>
+            <input type="number" id="hours" value="0" min="0">
+          </div>
+
+          <div>
+            <label>Minutes</label>
+            <input type="number" id="minutes" value="0" min="0">
+          </div>
+
+          <div class="full">
+            <label>Seconds</label>
+            <input type="number" id="seconds" value="0" min="0">
+          </div>
+
+        </div>
+
       </div>
 
-      <div>
-        <label>Hours</label>
-        <input type="number" id="hours" value="0" min="0">
-      </div>
+      <!-- PACE INPUTS -->
 
-      <div>
-        <label>Minutes</label>
-        <input type="number" id="minutes" value="0" min="0">
-      </div>
+      <div id="paceInputs" class="hidden">
 
-      <div class="full">
-        <label>Seconds</label>
-        <input type="number" id="seconds" value="0" min="0">
+        <div class="grid">
+
+          <div>
+            <label>Pace minutes</label>
+            <input type="number" id="paceMinutes" value="5" min="0">
+          </div>
+
+          <div>
+            <label>Pace seconds</label>
+            <input type="number" id="paceSeconds" value="0" min="0">
+          </div>
+
+          <div class="full">
+            <label>Pace unit</label>
+
+            <select id="paceUnit">
+              <option value="km">Per kilometre</option>
+              <option value="mile">Per mile</option>
+            </select>
+          </div>
+
+        </div>
+
       </div>
 
     </div>
@@ -250,8 +300,8 @@
       </div>
 
       <div class="card">
-        <h3>Speed mph</h3>
-        <div class="value" id="speedMph">--</div>
+        <h3>Estimated finish time</h3>
+        <div class="value" id="finishTime">--</div>
       </div>
 
     </div>
@@ -259,37 +309,74 @@
   </div>
 
   <script>
+
     let currentMode = 'check';
 
     function setMode(mode) {
+
       currentMode = mode;
 
-      document.getElementById('checkModeBtn').classList.toggle('active', mode === 'check');
-      document.getElementById('planModeBtn').classList.toggle('active', mode === 'plan');
-
-      document.getElementById('introText').textContent =
+      document.getElementById('checkModeBtn').classList.toggle(
+        'active',
         mode === 'check'
-          ? 'Calculate your running pace and speed from distance and time.'
-          : 'Enter your distance and target time to see the pace and speed you need.';
+      );
 
-      document.querySelector('button[onclick="calculate()"]').textContent =
-        mode === 'check'
-          ? 'Calculate my pace'
-          : 'Calculate the pace I need';
+      document.getElementById('planModeBtn').classList.toggle(
+        'active',
+        mode === 'plan'
+      );
+
+      document.getElementById('timeModeBtn').classList.toggle(
+        'active',
+        mode === 'time'
+      );
+
+      const timeInputs = document.getElementById('timeInputs');
+      const paceInputs = document.getElementById('paceInputs');
+
+      if (mode === 'time') {
+        timeInputs.classList.add('hidden');
+        paceInputs.classList.remove('hidden');
+      } else {
+        timeInputs.classList.remove('hidden');
+        paceInputs.classList.add('hidden');
+      }
+
+      const intro = document.getElementById('introText');
+
+      if (mode === 'check') {
+        intro.textContent =
+          'Calculate your running pace and speed from your completed run.';
+      }
+
+      if (mode === 'plan') {
+        intro.textContent =
+          'Enter your target race time to see the pace you need to run.';
+      }
+
+      if (mode === 'time') {
+        intro.textContent =
+          'Enter your pace and race distance to predict your finish time.';
+      }
 
       clearResults();
     }
 
-    function applyPresetDistance() {
-      const preset = document.getElementById('presetDistance').value;
+    function clearResults() {
 
-      if (preset) {
-        document.getElementById('distance').value = preset;
-        document.getElementById('unit').value = 'km';
-      }
+      document.getElementById('paceKm').textContent = '--';
+      document.getElementById('paceMile').textContent = '--';
+      document.getElementById('speedKm').textContent = '--';
+      document.getElementById('finishTime').textContent = '--';
+
+      const summary = document.getElementById('summary');
+
+      summary.classList.add('hidden');
+      summary.textContent = '';
     }
 
     function formatPace(minutesDecimal) {
+
       let mins = Math.floor(minutesDecimal);
       let secs = Math.round((minutesDecimal - mins) * 60);
 
@@ -302,6 +389,7 @@
     }
 
     function formatTime(totalSeconds) {
+
       const hours = Math.floor(totalSeconds / 3600);
       const minutes = Math.floor((totalSeconds % 3600) / 60);
       const seconds = Math.round(totalSeconds % 60);
@@ -313,28 +401,28 @@
       return `${minutes}m ${seconds}s`;
     }
 
-    function clearResults() {
-      document.getElementById('paceKm').textContent = '--';
-      document.getElementById('paceMile').textContent = '--';
-      document.getElementById('speedKm').textContent = '--';
-      document.getElementById('speedMph').textContent = '--';
-      document.getElementById('summary').classList.add('hidden');
-      document.getElementById('summary').textContent = '';
-    }
-
     function calculate() {
-      const distance = parseFloat(document.getElementById('distance').value);
+
+      const distance = parseFloat(
+        document.getElementById('distance').value
+      );
+
       const unit = document.getElementById('unit').value;
 
-      const hours = parseFloat(document.getElementById('hours').value) || 0;
-      const minutes = parseFloat(document.getElementById('minutes').value) || 0;
-      const seconds = parseFloat(document.getElementById('seconds').value) || 0;
+      if (!distance || distance <= 0) {
+        alert('Please enter a valid distance.');
+        return;
+      }
 
-      const totalSeconds = (hours * 3600) + (minutes * 60) + seconds;
-      const totalHours = totalSeconds / 3600;
+      const maxDistance =
+        unit === 'km'
+          ? 42.195
+          : 26.219;
 
-      if (!distance || distance <= 0 || totalSeconds <= 0) {
-        alert('Please enter a valid distance and time.');
+      if (distance > maxDistance) {
+        alert(
+          'Please enter a distance up to marathon distance.'
+        );
         return;
       }
 
@@ -349,28 +437,135 @@
         distanceKm = distance * 1.60934;
       }
 
-      const paceKm = (totalHours * 60) / distanceKm;
-      const paceMile = (totalHours * 60) / distanceMiles;
+      let totalHours;
+      let totalSeconds;
+      let paceKm;
+      let paceMile;
+      let speedKm;
 
-      const speedKm = distanceKm / totalHours;
-      const speedMph = distanceMiles / totalHours;
+      /* =========================
+         TIME MODE
+      ========================== */
 
-      document.getElementById('paceKm').textContent = `${formatPace(paceKm)} /km`;
-      document.getElementById('paceMile').textContent = `${formatPace(paceMile)} /mile`;
-      document.getElementById('speedKm').textContent = speedKm.toFixed(2);
-      document.getElementById('speedMph').textContent = speedMph.toFixed(2);
+      if (currentMode === 'time') {
 
-      const summary = document.getElementById('summary');
+        const paceMinutes =
+          parseFloat(document.getElementById('paceMinutes').value) || 0;
+
+        const paceSeconds =
+          parseFloat(document.getElementById('paceSeconds').value) || 0;
+
+        const paceUnit =
+          document.getElementById('paceUnit').value;
+
+        const paceDecimal =
+          paceMinutes + (paceSeconds / 60);
+
+        if (paceDecimal <= 0) {
+          alert('Please enter a valid pace.');
+          return;
+        }
+
+        if (paceUnit === 'km') {
+
+          paceKm = paceDecimal;
+          paceMile = paceDecimal * 1.60934;
+
+        } else {
+
+          paceMile = paceDecimal;
+          paceKm = paceDecimal / 1.60934;
+        }
+
+        totalSeconds = paceKm * distanceKm * 60;
+        totalHours = totalSeconds / 3600;
+
+        speedKm = distanceKm / totalHours;
+
+      }
+
+      /* =========================
+         CHECK + PLAN MODES
+      ========================== */
+
+      else {
+
+        const hours =
+          parseFloat(document.getElementById('hours').value) || 0;
+
+        const minutes =
+          parseFloat(document.getElementById('minutes').value) || 0;
+
+        const seconds =
+          parseFloat(document.getElementById('seconds').value) || 0;
+
+        totalSeconds =
+          (hours * 3600) +
+          (minutes * 60) +
+          seconds;
+
+        totalHours = totalSeconds / 3600;
+
+        if (totalHours <= 0) {
+          alert('Please enter a valid time.');
+          return;
+        }
+
+        paceKm =
+          (totalHours * 60) / distanceKm;
+
+        paceMile =
+          (totalHours * 60) / distanceMiles;
+
+        speedKm =
+          distanceKm / totalHours;
+      }
+
+      /* =========================
+         RESULTS
+      ========================== */
+
+      document.getElementById('paceKm').textContent =
+        `${formatPace(paceKm)} /km`;
+
+      document.getElementById('paceMile').textContent =
+        `${formatPace(paceMile)} /mile`;
+
+      document.getElementById('speedKm').textContent =
+        `${speedKm.toFixed(2)} km/h`;
+
+      document.getElementById('finishTime').textContent =
+        formatTime(totalSeconds);
+
+      const summary =
+        document.getElementById('summary');
+
       summary.classList.remove('hidden');
 
       if (currentMode === 'check') {
+
         summary.textContent =
-          `You ran ${distance} ${unit} in ${formatTime(totalSeconds)}. Your pace was ${formatPace(paceKm)} per km.`;
-      } else {
+          `You completed ${distance} ${unit} in ${formatTime(totalSeconds)} at an average pace of ${formatPace(paceKm)} per kilometre.`;
+      }
+
+      if (currentMode === 'plan') {
+
         summary.textContent =
-          `To complete ${distance} ${unit} in ${formatTime(totalSeconds)}, you need to run at ${formatPace(paceKm)} per km, or ${formatPace(paceMile)} per mile.`;
+          `To complete ${distance} ${unit} in ${formatTime(totalSeconds)}, you need to maintain a pace of ${formatPace(paceKm)} per kilometre.`;
+      }
+
+      if (currentMode === 'time') {
+
+        summary.textContent =
+          `At a pace of ${formatPace(paceKm)} per kilometre, your estimated finish time for ${distance} ${unit} is ${formatTime(totalSeconds)}.`;
       }
     }
+
+    <p class="small-link">
+      <a href="/alicecreates/">← Back to homepage</a>
+    </p>
+  </main>
+    
   </script>
 
 </body>
