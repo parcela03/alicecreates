@@ -310,6 +310,14 @@
           <p class="metric" id="dashAvoided">0</p>
         </div>
         <div class="card">
+          <p class="metric-label">Estimated waste avoided</p>
+          <p class="metric" id="dashWasteAvoided">0 kg</p>
+        </div>
+        <div class="card">
+          <p class="metric-label">Estimated disposal saving</p>
+          <p class="metric" id="dashCostSaving">£0</p>
+        </div>
+        <div class="card">
           <p class="metric-label">Open issues</p>
           <p class="metric" id="dashOpenIssues">0</p>
         </div>
@@ -517,7 +525,16 @@
           <p><strong>Reusable nappies logged:</strong> <span id="reportReusable">0</span></p>
           <p><strong>Disposable nappies logged:</strong> <span id="reportDisposable">0</span></p>
           <p><strong>Estimated disposables avoided:</strong> <span id="reportAvoided">0</span></p>
+          <p><strong>Estimated waste avoided:</strong> <span id="reportWasteAvoided">0 kg</span></p>
+          <p><strong>Estimated disposal saving:</strong> <span id="reportCostSaving">£0</span></p>
           <p><strong>Open issues:</strong> <span id="reportOpenIssues">0</span></p>
+        </div>
+        <div class="card">
+          <h3>Impact assumptions</h3>
+          <p class="small">These are prototype assumptions and can be refined for the final NLWA reporting method.</p>
+          <p><strong>Used disposable nappy weight:</strong> 0.1266 kg</p>
+          <p><strong>Disposal cost:</strong> £121 per tonne</p>
+          <p><strong>Current method:</strong> 1 reusable nappy used = 1 disposable nappy avoided</p>
         </div>
         <div class="card">
           <h3>Download data</h3>
@@ -550,6 +567,11 @@
 
   <script>
     const STORAGE_KEY = 'rnflNurseryPilotTrackerV1';
+
+    const IMPACT_ASSUMPTIONS = {
+      usedDisposableWeightKg: 0.1266,
+      disposalCostPerTonne: 121
+    };
 
     let state = {
       baseline: {},
@@ -708,11 +730,14 @@
       const reusable = state.weeklyLogs.reduce((sum, log) => sum + Number(log.reusableUsed || 0), 0);
       const disposable = state.weeklyLogs.reduce((sum, log) => sum + Number(log.disposableUsed || 0), 0);
       const avoided = reusable;
+      const wasteAvoidedKg = avoided * IMPACT_ASSUMPTIONS.usedDisposableWeightKg;
+      const wasteAvoidedTonnes = wasteAvoidedKg / 1000;
+      const costSaving = wasteAvoidedTonnes * IMPACT_ASSUMPTIONS.disposalCostPerTonne;
       const openIssues = state.issues.filter(issue => issue.issueStatus !== 'Resolved').length;
       const latestChildren = state.weeklyLogs.length
         ? state.weeklyLogs[state.weeklyLogs.length - 1].weekChildrenNappies
         : Number(state.baseline.childrenNappies || 0);
-      return { reusable, disposable, avoided, openIssues, latestChildren };
+      return { reusable, disposable, avoided, wasteAvoidedKg, wasteAvoidedTonnes, costSaving, openIssues, latestChildren };
     }
 
     function renderAll() {
@@ -729,6 +754,8 @@
       document.getElementById('dashReusable').textContent = t.reusable;
       document.getElementById('dashDisposable').textContent = t.disposable;
       document.getElementById('dashAvoided').textContent = t.avoided;
+      document.getElementById('dashWasteAvoided').textContent = `${t.wasteAvoidedKg.toFixed(1)} kg`;
+      document.getElementById('dashCostSaving').textContent = `£${t.costSaving.toFixed(2)}`;
       document.getElementById('dashOpenIssues').textContent = t.openIssues;
     }
 
@@ -826,6 +853,8 @@
       document.getElementById('reportReusable').textContent = t.reusable;
       document.getElementById('reportDisposable').textContent = t.disposable;
       document.getElementById('reportAvoided').textContent = t.avoided;
+      document.getElementById('reportWasteAvoided').textContent = `${t.wasteAvoidedKg.toFixed(1)} kg / ${t.wasteAvoidedTonnes.toFixed(3)} tonnes`;
+      document.getElementById('reportCostSaving').textContent = `£${t.costSaving.toFixed(2)}`;
       document.getElementById('reportOpenIssues').textContent = t.openIssues;
     }
 
@@ -836,6 +865,16 @@
       Object.entries(state.baseline || {}).forEach(([key, val]) => {
         rows.push(['Baseline', key, val]);
       });
+
+      rows.push([]);
+      rows.push(['Impact Summary']);
+      const impactTotals = totals();
+      rows.push(['Estimated disposables avoided', impactTotals.avoided]);
+      rows.push(['Estimated waste avoided kg', impactTotals.wasteAvoidedKg.toFixed(2)]);
+      rows.push(['Estimated waste avoided tonnes', impactTotals.wasteAvoidedTonnes.toFixed(4)]);
+      rows.push(['Estimated disposal saving GBP', impactTotals.costSaving.toFixed(2)]);
+      rows.push(['Assumption used disposable nappy weight kg', IMPACT_ASSUMPTIONS.usedDisposableWeightKg]);
+      rows.push(['Assumption disposal cost per tonne GBP', IMPACT_ASSUMPTIONS.disposalCostPerTonne]);
 
       rows.push([]);
       rows.push(['Weekly Logs']);
